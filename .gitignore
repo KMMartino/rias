@@ -1,0 +1,33 @@
+# Prerequisites
+*.d
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.lib
+*.dll
+*.so
+*.dylib
+
+# CMake build artifacts
+/build/
+/out/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# VS Code
+.vscode/
+# Keep settings if you want to share them, but usually ignore
+# !.vscode/settings.json 
+# !.vscode/tasks.json
+# !.vscode/launch.json
+
+# vcpkg (if using manifest mode later)
+vcpkg_installed/
+
+# OS
+.DS_Store
+Thumbs.db
