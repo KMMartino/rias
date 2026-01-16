@@ -17,6 +17,4 @@ int main(int argc, char** argv) {
     if (analyzer.analyze(videoPath)) {
         analyzer.exportCsv(csvPath);
     }
-
-    return 0;
 }
