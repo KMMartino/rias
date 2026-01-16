@@ -108,7 +108,8 @@ void Analyzer::exportCsv(const std::string& outputPath) const {
     }
 
     file << "Time(s),FPS,Frametime(ms)\n";
-    for(const auto& res : m_results){
+    for(size_t i=1; i < m_results.size(); ++i){
+        const auto& res = m_results[i];
         if(res.uniqueFrame){
             file << std::format("{:.3f},{:.1f},{:.2f}\n", res.timestampSec, res.fps, res.frametime);
         }

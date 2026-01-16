@@ -12,6 +12,7 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
                 m_threshold = std::stoi(argv[i + 1]);
                 std::println("Threshold {} selected", m_threshold);
                 i++;
+                continue;
             } else{
                 throw std::runtime_error("Option Error: --threshold option needs a value (int)");
             }
@@ -20,6 +21,7 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
             if(i + 1 < argc){
                 m_outPath = std::string(argv[i + 1]);
                 i++;
+                continue;
             } else{
                 throw std::runtime_error("Option Error: --output option needs a value (filename.csv)");
             }

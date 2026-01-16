@@ -23,10 +23,10 @@ This will output a csv file "filename-results.csv" containing
 Time(s), fps, frametime
 
 ## Flags
-### --threshold (int 0-255 default: 30)
+### --threshold (int 0-255, default: 30)
 * Usage: --threshold int
 * The amount that a grayscale pixel between frames can differ before it is counted as different, thus triggering a new frame.
-### --output (string default: input_file_name-result.csv)
+### --output (string xyz.csv, default: input_file_name-result.csv)
 * Usage: --output string
 * Sets the output file name. Probably the location too if you pass path/file.csv in. I'm not really sure. Also it will override files without notice (only csv). Be careful.
 
