@@ -1,17 +1,18 @@
 #include <opencv2/opencv.hpp>
 #include <print>
-#include <vector>
+#include "FrameProcessor.h"
 
 int main() {
-    // 1. Test C++23 std::println
     std::println("Rias Project: Starting up...");
+    cv::Mat img1 = cv::Mat::zeros(100, 100, CV_8UC3);
+    cv::Mat img2 = img1.clone();
+    cv::rectangle(img2, cv::Rect(10, 10, 5, 5), cv::Scalar(255, 255, 255), -1);
 
-    // 2. Test OpenCV Linking
-    // Just creating a dummy matrix to ensure the linker finds the libs
-    cv::Mat image = cv::Mat::zeros(100, 100, CV_8UC3);
-    
-    std::println("OpenCV Linked successfully. Matrix size: {} x {}", image.rows, image.cols);
-    std::println("OpenCV Version: {}", CV_VERSION);
+    FrameProcessor processor(30);
 
-    return 0;
+    bool result1 = processor.is_frame_unique(img1, img1);
+    std::println("Test1 -identical- {}", result1 ? "Unique" : "Duplicate");
+
+    bool result2 = processor.is_frame_unique(img1, img2);
+    std::println("Test1 -unique- {}", result2 ? "Unique" : "Duplicate");
 }

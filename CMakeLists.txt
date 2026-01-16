@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
-# --- ADD THIS LINE AT THE TOP ---
 set(CMAKE_TOOLCHAIN_FILE "C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake")
-# --------------------------------
+
 
 project(rias LANGUAGES CXX)
 
@@ -14,7 +13,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Find OpenCV
 find_package(OpenCV REQUIRED)
 
-add_executable(rias src/main.cpp)
+file(GLOB SOURCES "src/*cpp")
+add_executable(rias ${SOURCES})
 
 # Link OpenCV
 target_link_libraries(rias PRIVATE ${OpenCV_LIBS})
