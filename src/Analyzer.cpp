@@ -5,8 +5,8 @@
 #include <cmath>
 #include <opencv2/opencv.hpp>
 
-Analyzer::Analyzer()
-    :m_processor(30), m_bufferIdx(0), m_recordedFps(0.0)
+Analyzer::Analyzer(int threshold)
+    :m_processor(threshold), m_bufferIdx(0), m_recordedFps(0.0)
 {
 }
 
@@ -54,7 +54,7 @@ bool Analyzer::analyze(const std::string& videoPath){
         m_fpsBuffer[m_bufferIdx] = unique;
 
         double currentFps = std::accumulate(m_fpsBuffer.begin(), m_fpsBuffer.end(), 0.0);
-        if(frameCounter < 60 && frameCounter > 12){
+        if(frameCounter < bufferSize){
             currentFps *= (double)bufferSize / frameCounter;
         }
 
@@ -113,5 +113,5 @@ void Analyzer::exportCsv(const std::string& outputPath) const {
             file << std::format("{:.3f},{:.1f},{:.2f}\n", res.timestampSec, res.fps, res.frametime);
         }
     }
-    std::println("Exported CSV to:{}", outputPath);
+    std::println("Exported CSV to: {}", outputPath);
 }
