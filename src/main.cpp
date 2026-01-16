@@ -1,18 +1,22 @@
 #include <opencv2/opencv.hpp>
+#include "analyzer.h"
 #include <print>
-#include "FrameProcessor.h"
+#include <filesystem>
 
-int main() {
-    std::println("Rias Project: Starting up...");
-    cv::Mat img1 = cv::Mat::zeros(100, 100, CV_8UC3);
-    cv::Mat img2 = img1.clone();
-    cv::rectangle(img2, cv::Rect(10, 10, 5, 5), cv::Scalar(255, 255, 255), -1);
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::println("Usage: rias.exe <video_path>");
+        return 1;
+    }
 
-    FrameProcessor processor(30);
+    std::string videoPath = argv[1];
+    std::filesystem::path filePath(videoPath);
+    std::string csvPath = filePath.replace_extension("").string() + "-results.csv";
 
-    bool result1 = processor.is_frame_unique(img1, img1);
-    std::println("Test1 -identical- {}", result1 ? "Unique" : "Duplicate");
+    Analyzer analyzer;
+    if (analyzer.analyze(videoPath)) {
+        analyzer.exportCsv(csvPath);
+    }
 
-    bool result2 = processor.is_frame_unique(img1, img2);
-    std::println("Test1 -unique- {}", result2 ? "Unique" : "Duplicate");
+    return 0;
 }
