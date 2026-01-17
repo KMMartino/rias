@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cmath>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 Analyzer::Analyzer(int threshold)
     :m_processor(threshold), m_bufferIdx(0), m_recordedFps(0.0)
@@ -31,9 +32,11 @@ bool Analyzer::analyze(const std::string& videoPath){
     cv::Mat currentFrame, prevFrame;
     bool firstFrame = true;
     int frameCounter = 0;
+    int uniqueFrameCount = 0;
 
     std::println("Starting analysis on {} frames @ {} fps...", totalFrames, m_recordedFps);
 
+    auto loopTimeStart = std::chrono::high_resolution_clock::now();
     while(true){  
         cap >> currentFrame;
         if(currentFrame.empty()) break;
@@ -42,37 +45,54 @@ bool Analyzer::analyze(const std::string& videoPath){
 
         if(firstFrame){
             unique = 1;
+            uniqueFrameCount++;
             prevFrame = currentFrame.clone();
             firstFrame = false;
         }else{
             if(m_processor.is_frame_unique(currentFrame, prevFrame)){
                 unique = 1;
+                uniqueFrameCount++;
             }
             prevFrame = currentFrame.clone();
         }
-
         m_fpsBuffer[m_bufferIdx] = unique;
 
+        // calculate current fps
         double currentFps = std::accumulate(m_fpsBuffer.begin(), m_fpsBuffer.end(), 0.0);
         if(frameCounter < bufferSize){
-            currentFps *= (double)bufferSize / frameCounter;
+            currentFps *= (double)bufferSize / (frameCounter + 1);
         }
 
+        // calculate current frame frametime
         double currentFrametime = 0.0;
         if(unique){
             currentFrametime = calculateFrametime(m_bufferIdx);
         }
 
-        double timestamp = frameCounter / m_recordedFps;
-        m_results.push_back({timestamp, currentFps, currentFrametime, unique});
+        // calculate timestamp
+        double currentDuration = (frameCounter + 1) / m_recordedFps;
 
+        // calculate average fps
+        double totalAveFramerate = uniqueFrameCount / currentDuration;
+
+        m_results.push_back({currentDuration, totalAveFramerate, currentFps, currentFrametime, unique});
+        
+        // increment rolling 1s buffer modulo framerate
         m_bufferIdx = (m_bufferIdx + 1) % bufferSize;
         frameCounter ++;
 
-        if(frameCounter % 100 == 0){
+        if(frameCounter % 5 * bufferSize == 0){
             std::print("\rProcessing: {:.1f}%", (frameCounter / (double)totalFrames) * 100.0);
         }
     }
+    auto loopTimeEnd = std::chrono::high_resolution_clock::now();
+    auto loopDuration = std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count();
+    double processingSpeed = 0.0;
+    if(loopDuration > 0){
+        processingSpeed = frameCounter * 1000 / loopDuration;
+    }
+    std::println("\nMain loop took: {} ms", loopDuration);
+    std::println("Processing Speed: {:.1f} fps", processingSpeed);
 
     std::println("\nAnalysis Complete.");
     return true;
@@ -107,11 +127,11 @@ void Analyzer::exportCsv(const std::string& outputPath) const {
         return;
     }
 
-    file << "Time(s),FPS,Frametime(ms)\n";
+    file << "Time(s),fps(total),fps(current),Frametime(ms)\n";
     for(size_t i=1; i < m_results.size(); ++i){
         const auto& res = m_results[i];
         if(res.uniqueFrame){
-            file << std::format("{:.3f},{:.1f},{:.2f}\n", res.timestampSec, res.fps, res.frametime);
+            file << std::format("{:.3f},{:.1f},{:.1f},{:.2f}\n", res.timestampSec, res.toalAverageFramerate, res.currentFps, res.frametime);
         }
     }
     std::println("Exported CSV to: {}", outputPath);

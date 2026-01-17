@@ -8,7 +8,8 @@
 // struct to hold analysis data per frame
 struct AnalysisResult{
     double timestampSec;
-    double fps;
+    double toalAverageFramerate;
+    double currentFps;
     double frametime;
     bool uniqueFrame;
 };

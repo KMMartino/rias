@@ -42,6 +42,6 @@ Time(s), fps, frametime
 ## Todo
 * Add --tuning option
     * Input pass in user hand counted framerate so the program can tell you if your threshold is set correctly.
-* Add tracking for ave fps, running fps, 1% low, 0.1% low
+* Add tracking for ave fps, running fps, 1% low, 0.1% low ← on second thought tracking lows for console is dumb so no
 * Add framerate visualization tools
 * Add completion time etc metrics to output
