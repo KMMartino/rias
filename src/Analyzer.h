@@ -28,5 +28,11 @@ private:
     std::vector<uint8_t> m_fpsBuffer; 
     size_t m_bufferIdx;
     double m_recordedFps;
+    int m_totalFrames;
+    int m_bufferSize;
+
     double calculateFrametime(size_t currentBufferIdx);
+    void init(const cv::VideoCapture& capture);
+    void printReport(long long& loopDuration);
+    void process(int& frameCounter, bool& unique, int& uniqueFrameCount);
 };
