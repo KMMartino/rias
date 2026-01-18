@@ -30,6 +30,24 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
             m_report = true;
             continue;
         }
+        if(arg == "--diffview"){
+            m_diffView = true;
+            continue;
+        }
+        if(arg == "--delay"){
+            if(i + 1 < argc){
+                m_delay = std::stoi(argv[i + 1]);
+                if(m_delay < 0){
+                    m_delay = 1;
+                    std::println("Error: --delay must be 0 or larger. Restored default: 1");
+                } 
+                std::println("diffview delay {}ms selected", m_delay);
+                i++;
+                continue;
+            } else{
+                throw std::runtime_error("Option Error: --delay option needs a value (int)");
+            }
+        }
         m_inPath = argv[i];
     }
     if(m_inPath == ""){
@@ -51,18 +69,26 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
 }
 
 
-int ArgumentParser::getThreshold(){
+const int ArgumentParser::getThreshold(){
     return m_threshold;
 }
 
-std::string ArgumentParser::getInPath(){
+const std::string ArgumentParser::getInPath(){
     return m_inPath;
 }
 
-std::string ArgumentParser::getOutPath(){
+const std::string ArgumentParser::getOutPath(){
     return m_outPath;
 }
 
-bool ArgumentParser::getReport(){
+const bool ArgumentParser::getReport(){
     return m_report;
+}
+
+const bool ArgumentParser::getDiffView(){
+    return m_diffView;
+}
+
+const int ArgumentParser::getDelay(){
+    return m_delay;
 }

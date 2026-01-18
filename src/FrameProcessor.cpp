@@ -23,3 +23,7 @@ bool FrameProcessor::is_frame_unique(const cv::Mat& current, const cv::Mat& prev
 
     return (non_zero > 0);
 }
+
+const cv::Mat& FrameProcessor::getDiff(){
+    return m_diff;
+}

@@ -7,8 +7,14 @@
 #include <chrono>
 #include <algorithm>
 
-Analyzer::Analyzer(int threshold, bool reportFlag)
-    :m_processor(threshold), m_bufferIdx(0), m_recordedFps(0.0), m_reportFlag(reportFlag), m_uniqueFrames(0)
+Analyzer::Analyzer(int threshold, bool reportFlag, bool diffViewFlag, int delay)
+    : m_processor(threshold)
+    , m_bufferIdx(0)
+    , m_recordedFps(0.0)
+    , m_reportFlag(reportFlag)
+    , m_diffViewFlag(diffViewFlag)
+    , m_uniqueFrames(0)
+    , m_delay(delay)
 {
 }
 
@@ -26,6 +32,9 @@ bool Analyzer::analyze(const std::string& videoPath){
     int frameCounter = 0;
 
     std::println("Starting analysis on {} frames @ {} fps...", m_totalFrames, m_recordedFps);
+
+    cv::Mat lastUniqueDiffBgr;
+    int consecutiveDupes;
 
     auto loopTimeStart = std::chrono::high_resolution_clock::now();
     while(true){  
@@ -49,6 +58,11 @@ bool Analyzer::analyze(const std::string& videoPath){
         m_fpsBuffer[m_bufferIdx] = unique;
 
         process(frameCounter, unique);
+        frameCounter ++;
+
+        if(m_diffViewFlag){
+            diffView(consecutiveDupes, lastUniqueDiffBgr, currentFrame, unique);
+        }
     }
     auto loopTimeEnd = std::chrono::high_resolution_clock::now();
 
@@ -141,14 +155,14 @@ void Analyzer::printReport(long long& loopDuration){
                 if(res.frametime > stutterThreshold_ms) stutterCount++;
             }
         }
-        std::println("\n----------\ndetailed report\n");
+        std::println("----------\ndetailed report\n");
         std::println("1% low fps: {}fps", getLowFps(frametimeHistogram, 0.01));
         std::println("0.1% low fps: {}fps", getLowFps(frametimeHistogram, 0.001));
         std::println("stutters: -{}- major stutters were detedted (3 or more consecutive frames)", stutterCount);
-        std::println("\nreport end\n----------\n");
+        std::println("\nreport end\n----------");
     }
     
-    std::println("\nAnalysis Complete.");
+    std::println("Analysis Complete.");
 }
 
 double Analyzer::getLowFps(const std::map<unsigned int, int>& histogram, double percentile){
@@ -167,7 +181,7 @@ double Analyzer::getLowFps(const std::map<unsigned int, int>& histogram, double 
     return 1000000.0 * targetCount / accumulatedTime_micsec;
 }
 
-void Analyzer::process(int& frameCounter, bool& unique){
+void Analyzer::process(const int& frameCounter, const bool& unique){
     //current fps
     double currentFps = std::accumulate(m_fpsBuffer.begin(), m_fpsBuffer.end(), 0.0);
     if(frameCounter < m_bufferSize){
@@ -187,9 +201,45 @@ void Analyzer::process(int& frameCounter, bool& unique){
     
     // increment rolling 1s buffer modulo framerate
     m_bufferIdx = (m_bufferIdx + 1) % m_bufferSize;
-    frameCounter ++;
 
     if(frameCounter % (5 * m_bufferSize) == 0){
         std::print("\rProcessing: {:.1f}%", (frameCounter / (double)m_totalFrames) * 100.0);
     }
+}
+
+void Analyzer::diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, bool unique){
+    if(unique){
+        consecutiveDupes = 0;
+        const cv::Mat& diff = m_processor.getDiff();
+
+        if(!diff.empty()){
+            cv::cvtColor(diff, lastUniqueDiffBgr, cv::COLOR_GRAY2BGR);
+        }
+        else{
+            lastUniqueDiffBgr = cv::Mat::zeros(currentFrame.size(), CV_8UC3);
+        }
+        cv::imshow("Preview", lastUniqueDiffBgr);
+    }
+    else{
+        consecutiveDupes++;
+
+        if(!lastUniqueDiffBgr.empty()){
+            cv::Mat coloredFrame = lastUniqueDiffBgr.clone();
+
+            std::vector<cv::Mat> channels;
+            cv::split(coloredFrame, channels);
+
+            if (consecutiveDupes == 1) {
+                channels[0] = cv::Scalar(0); 
+            } 
+            else {
+                channels[0] = cv::Scalar(0);
+                channels[1] = cv::Scalar(0);
+            }
+
+            cv::merge(channels, coloredFrame);
+            cv::imshow("Preview", coloredFrame);
+        }
+    }
+    cv::waitKey(m_delay);
 }
