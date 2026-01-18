@@ -114,6 +114,7 @@ void Analyzer::init(const cv::VideoCapture& capture){
     m_fpsBuffer.assign(m_bufferSize, 0); 
     m_bufferIdx = 0;
     m_results.clear();
+    m_resultsUnique.clear();
     m_results.reserve(m_totalFrames);
 }
 
@@ -150,7 +151,7 @@ void Analyzer::printReport(long long& loopDuration){
     std::println("\nAnalysis Complete.");
 }
 
-double Analyzer::getLowFps(std::map<unsigned int, int> histogram, double percentile){
+double Analyzer::getLowFps(const std::map<unsigned int, int>& histogram, double percentile){
     unsigned int targetCount = std::llround(m_uniqueFrames * percentile);
     if(targetCount == 0) return 0.0;
 
@@ -163,7 +164,7 @@ double Analyzer::getLowFps(std::map<unsigned int, int> histogram, double percent
         if(neededFrames <= 0) break;
     }
 
-    return 1000000 * targetCount / accumulatedTime_micsec;
+    return 1000000.0 * targetCount / accumulatedTime_micsec;
 }
 
 void Analyzer::process(int& frameCounter, bool& unique){

@@ -36,6 +36,6 @@ private:
     double calculateFrametime(size_t currentBufferIdx);
     void init(const cv::VideoCapture& capture);
     void printReport(long long& loopDurationm);
-    double getLowFps(std::map<unsigned int, int> histogram, double percentile);
+    double getLowFps(const std::map<unsigned int, int>& histogram, double percentile);
     void process(int& frameCounter, bool& unique);
 };
