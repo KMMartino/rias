@@ -29,6 +29,9 @@ Time(s), fps, frametime
 ### --output (string xyz.csv, default: input_file_name-result.csv)
 * Usage: --output string
 * Sets the output file name. Probably the location too if you pass path/file.csv in. I'm not really sure. Also it will override files without notice (only csv). Be careful.
+### --report
+* Usage: --report
+* Tells the program to print out a detailed report of things like 1% and 0.1% percentile frames, the number of major stutters, etc... Think of it like a --verbose flag for other programs. Also I thought it would be cool to implement a sorting algorithm from scratch in C++. Since boot.dev made me do it in python. Nevemind. I ended up using a map rather than a proper sorting algorithm. 
 
 ## Framerate calculation quirks
 * Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored

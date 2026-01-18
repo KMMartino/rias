@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 
     try{
         ArgumentParser parser(argc, argv);
-        Analyzer analyzer(parser.getThreshold());
+        Analyzer analyzer(parser.getThreshold(), parser.getReport());
         if (analyzer.analyze(parser.getInPath())) {
             analyzer.exportCsv(parser.getOutPath());
         }

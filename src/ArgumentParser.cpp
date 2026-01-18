@@ -26,6 +26,10 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
                 throw std::runtime_error("Option Error: --output option needs a value (filename.csv)");
             }
         }
+        if(arg == "--report"){
+            m_report = true;
+            continue;
+        }
         m_inPath = argv[i];
     }
     if(m_inPath == ""){
@@ -57,4 +61,8 @@ std::string ArgumentParser::getInPath(){
 
 std::string ArgumentParser::getOutPath(){
     return m_outPath;
+}
+
+bool ArgumentParser::getReport(){
+    return m_report;
 }
