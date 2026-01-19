@@ -63,10 +63,10 @@ bool Analyzer::analyze(){
         frameCounter ++;
 
         if(m_config.diffView){
-            diffView(consecutiveDupes, lastUniqueDiffBgr, *pCurrentFrame, unique);
+            diffView(consecutiveDupes, lastUniqueDiffBgr, *pCurrentFrame, *pPrevFrame, unique);
             int key = cv::waitKey(m_config.delay);
         
-            if (key == 27 || key == 'q' || key == 'Q') {
+            if (key == 27) {
                 std::println("\nUser interrupted analysis via keyboard.");
                 break;
             }
@@ -220,39 +220,31 @@ void Analyzer::process(const int& frameCounter, const bool& unique){
     }
 }
 
-void Analyzer::diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, bool unique){
+void Analyzer::diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, cv::Mat& previousFrame, bool unique){
     if(unique){
         consecutiveDupes = 0;
-        const cv::Mat& diff = m_processor.getDiff();
-
-        if(!diff.empty()){
-            cv::cvtColor(diff, lastUniqueDiffBgr, cv::COLOR_GRAY2BGR);
-        }
-        else{
-            lastUniqueDiffBgr = cv::Mat::zeros(currentFrame.size(), CV_8UC3);
-        }
+        cv::absdiff(currentFrame, previousFrame, lastUniqueDiffBgr);
+        lastUniqueDiffBgr *= 5;
         cv::imshow("Preview", lastUniqueDiffBgr);
     }
     else{
         consecutiveDupes++;
 
-        if(!lastUniqueDiffBgr.empty()){
-            cv::Mat coloredFrame = lastUniqueDiffBgr.clone();
+        cv::Mat coloredFrame = lastUniqueDiffBgr.clone();
 
-            std::vector<cv::Mat> channels;
-            cv::split(coloredFrame, channels);
+        std::vector<cv::Mat> channels;
+        cv::split(coloredFrame, channels);
 
-            if (consecutiveDupes == 1) {
-                channels[0] = cv::Scalar(0); 
-            } 
-            else {
-                channels[0] = cv::Scalar(0);
-                channels[1] = cv::Scalar(0);
-            }
-
-            cv::merge(channels, coloredFrame);
-            cv::imshow("Preview", coloredFrame);
+        if (consecutiveDupes == 1) {
+            channels[0] = cv::Scalar(0); 
+        } 
+        else {
+            channels[0] = cv::Scalar(0);
+            channels[1] = cv::Scalar(0);
         }
+
+        cv::merge(channels, coloredFrame);
+        cv::imshow("Preview", coloredFrame);
     }
     cv::waitKey(m_config.delay);
 }

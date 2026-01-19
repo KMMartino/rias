@@ -40,5 +40,5 @@ private:
     void printReport(long long& loopDurationm);
     double getLowFps(const std::map<unsigned int, int>& histogram, double percentile);
     void process(const int& frameCounter, const bool& unique);
-    void diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, bool unique);
+    void diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, cv::Mat& previousFrame, bool unique);
 };

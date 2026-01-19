@@ -12,8 +12,8 @@ bool FrameProcessor::is_frame_unique(const cv::Mat& current, const cv::Mat& prev
     static cv::Mat smallCur, smallPrev;
     static cv::Mat smallCurGreen, smallPrevGreen;
 
-    cv::resize(current, smallCur, cv::Size(320, 180), 0, 0, cv::INTER_NEAREST);
-    cv::resize(previous, smallPrev, cv::Size(320, 180), 0, 0, cv::INTER_NEAREST);
+    cv::resize(current, smallCur, cv::Size(480, 270), 0, 0, cv::INTER_NEAREST);
+    cv::resize(previous, smallPrev, cv::Size(480, 270), 0, 0, cv::INTER_NEAREST);
 
     cv::extractChannel(smallCur, smallCurGreen, 1);
     cv::extractChannel(smallPrev, smallPrevGreen, 1);

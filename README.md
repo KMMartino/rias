@@ -16,6 +16,9 @@ cmake --build build
 ```
 
 ## Usage
+
+**You need Lossless video for this to work!!**
+
 ```bash
 ./rias.exe --flags filepath_to_input_video
 ```
@@ -35,9 +38,11 @@ Time(s), fps, frametime
 ### --diffview
 * Usage --diffview
 * Opens a window to display the frame diffs (changed pixels shown white. Everything else black). If the same frame is shown more than once, it replays the last diff but in yellow, then red for any more. This process depends on your PC spec and can be very fast and impossible to decipher. Use with the following --delay option to mitigate this.
+* Compared to the standard operations this will significantly hurt performance.
 ### --delay (int >= 0, default: 1)
 * Usage --delay int
 * Use with the above --diffview; adds a delay to displaying the diff frame to make the output more readable. The delay is in ms. Selecting 0 will enter a different mode where the program will not proceed to processing the next frame until user input(spacebar). Holding the input will make the program proceed as normal. 
+* Selecting a high delay will make the program take for ever to finish executing. You can press esc to exit early. You may have to mash it a bit. It's a bit janky.
 
 ## Framerate calculation quirks
 * Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored
@@ -52,4 +57,3 @@ Time(s), fps, frametime
 * Add --tuning option
     * Input pass in user hand counted framerate so the program can tell you if your threshold is set correctly.
 * Add framerate visualization / graphing tools.
-* Optimize usage of opencv libraries to improve performance.
