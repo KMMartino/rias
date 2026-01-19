@@ -7,35 +7,43 @@
 #include <chrono>
 #include <algorithm>
 
-Analyzer::Analyzer(int threshold, bool reportFlag, bool diffViewFlag, int delay)
-    : m_processor(threshold)
+Analyzer::Analyzer(const riasConfig& config)
+    : m_processor(config.threshold)
+    , m_config(config)
     , m_bufferIdx(0)
     , m_recordedFps(0.0)
-    , m_reportFlag(reportFlag)
-    , m_diffViewFlag(diffViewFlag)
     , m_uniqueFrames(0)
-    , m_delay(delay)
 {
 }
 
-bool Analyzer::analyze(const std::string& videoPath){
-    cv::VideoCapture cap(videoPath, cv::CAP_FFMPEG);
+bool Analyzer::analyze(){
+    cv::VideoCapture cap(m_config.inPath, cv::CAP_FFMPEG);
     if(!cap.isOpened()){
-        std::println(stderr, "Error: Could not open video: {}", videoPath);
+        std::println(stderr, "Error: Could not open video: {}", m_config.inPath);
         return false;
     }
 
     init(cap);
 
     cv::Mat currentFrame, prevFrame;
-    bool firstFrame = true;
-    int frameCounter = 0;
 
     std::println("Starting analysis on {} frames @ {} fps...", m_totalFrames, m_recordedFps);
 
+    //manually process first frame
+    cap >> currentFrame;
+    if(currentFrame.empty()) return false;
+
+    m_uniqueFrames = 1;
+    m_fpsBuffer[0] = 1;
+    m_bufferIdx = 1;
+
+    prevFrame = currentFrame.clone();
+    
     cv::Mat lastUniqueDiffBgr;
     int consecutiveDupes;
 
+    //process rest of the frames
+    int frameCounter = 1;
     auto loopTimeStart = std::chrono::high_resolution_clock::now();
     while(true){  
         cap >> currentFrame;
@@ -43,25 +51,24 @@ bool Analyzer::analyze(const std::string& videoPath){
         
         bool unique = 0;
 
-        if(firstFrame){
+        if(m_processor.is_frame_unique(currentFrame, prevFrame)){
             unique = 1;
             m_uniqueFrames++;
-            prevFrame = currentFrame.clone();
-            firstFrame = false;
-        }else{
-            if(m_processor.is_frame_unique(currentFrame, prevFrame)){
-                unique = 1;
-                m_uniqueFrames++;
-            }
-            prevFrame = currentFrame.clone();
         }
+        prevFrame = currentFrame.clone();
         m_fpsBuffer[m_bufferIdx] = unique;
 
         process(frameCounter, unique);
         frameCounter ++;
 
-        if(m_diffViewFlag){
+        if(m_config.diffView){
             diffView(consecutiveDupes, lastUniqueDiffBgr, currentFrame, unique);
+            int key = cv::waitKey(m_config.delay);
+        
+            if (key == 27 || key == 'q' || key == 'Q') {
+                std::println("\nUser interrupted analysis via keyboard.");
+                break;
+            }
         }
     }
     auto loopTimeEnd = std::chrono::high_resolution_clock::now();
@@ -102,14 +109,14 @@ void Analyzer::exportCsv(const std::string& outputPath) const {
     }
 
     file << "Time(s),fps(total),fps(current),Frametime(ms)\n";
-    if(m_reportFlag){
+    if(m_config.report){
         for(size_t i = 0; i < m_resultsUnique.size(); ++i){
             const auto& res = m_resultsUnique[i];
             file << std::format("{:.3f},{:.1f},{:.1f},{:.2f}\n", res.timestampSec, res.totalAverageFramerate, res.currentFps, res.frametime);
         }
     }
     else{
-        for(size_t i = 1; i < m_results.size(); ++i){
+        for(size_t i = 0; i < m_results.size(); ++i){
             const auto& res = m_results[i];
             if(res.uniqueFrame){
                 file << std::format("{:.3f},{:.1f},{:.1f},{:.2f}\n", res.timestampSec, res.totalAverageFramerate, res.currentFps, res.frametime);
@@ -126,7 +133,10 @@ void Analyzer::init(const cv::VideoCapture& capture){
     m_totalFrames = (int)capture.get(cv::CAP_PROP_FRAME_COUNT);
     m_bufferSize = (int)std::ceil(m_recordedFps);
     m_fpsBuffer.assign(m_bufferSize, 0); 
+
     m_bufferIdx = 0;
+    m_uniqueFrames = 0;
+
     m_results.clear();
     m_resultsUnique.clear();
     m_results.reserve(m_totalFrames);
@@ -140,7 +150,7 @@ void Analyzer::printReport(long long& loopDuration){
     std::println("\nMain loop took: {} ms", loopDuration);
     std::println("Processing Speed: {:.1f} fps", processingSpeed);
 
-    if(m_reportFlag){
+    if(m_config.report){
         std::vector<double> frametimes;
         m_resultsUnique.reserve(m_results.size() / 2);
         std::map<unsigned int, int> frametimeHistogram;
@@ -241,5 +251,5 @@ void Analyzer::diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::M
             cv::imshow("Preview", coloredFrame);
         }
     }
-    cv::waitKey(m_delay);
+    cv::waitKey(m_config.delay);
 }

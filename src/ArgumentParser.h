@@ -2,21 +2,22 @@
 #include <string>
 #include <vector>
 
+struct riasConfig{
+    int threshold = 30;
+    std::string inPath = "";
+    std::string outPath = "";
+    bool report = false;
+    bool diffView = false;
+    int delay = 1;
+    bool delaySet = false;
+};
 
 class ArgumentParser{
 public:
     ArgumentParser(int argc, char* argv[]);
-    const int getThreshold();
-    const std::string getInPath();
-    const std::string getOutPath();
-    const bool getReport();
-    const bool getDiffView();
-    const int getDelay();
+    const riasConfig& getConfig() const;
 private:
-    int m_threshold = 30;
-    std::string m_inPath = "";
-    std::string m_outPath = "";
-    bool m_report = false;
-    bool m_diffView = false;
-    int m_delay = 1;
+    riasConfig m_config;
+    void validate();
+    void confirmConfig();
 };

@@ -15,13 +15,13 @@ int main(int argc, char** argv) {
 
     try{
         ArgumentParser parser(argc, argv);
-        Analyzer analyzer(parser.getThreshold(), parser.getReport(), parser.getDiffView(), parser.getDelay());
-        if (analyzer.analyze(parser.getInPath())) {
-            analyzer.exportCsv(parser.getOutPath());
+        riasConfig config = parser.getConfig();
+        Analyzer analyzer(config);
+        if (analyzer.analyze()) {
+            analyzer.exportCsv(config.outPath);
         }
 
         auto programTimeEnd = std::chrono::high_resolution_clock::now();
-        auto loopTimeEnd = std::chrono::high_resolution_clock::now();
         auto programDuration = std::chrono::duration_cast<std::chrono::milliseconds>(programTimeEnd - programTimeStart).count();
         std::println("\nProgram took: {} ms", programDuration);
         

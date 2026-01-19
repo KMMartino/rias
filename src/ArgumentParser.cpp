@@ -9,8 +9,8 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
         std::string arg(argv[i]);
         if(arg == "--threshold"){
             if(i + 1 < argc){
-                m_threshold = std::stoi(argv[i + 1]);
-                std::println("Threshold {} selected", m_threshold);
+                m_config.threshold = std::stoi(argv[i + 1]);
+                std::println("Threshold {} selected", m_config.threshold);
                 i++;
                 continue;
             } else{
@@ -19,7 +19,7 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
         }
         if(arg == "--output"){
             if(i + 1 < argc){
-                m_outPath = std::string(argv[i + 1]);
+                m_config.outPath = std::string(argv[i + 1]);
                 i++;
                 continue;
             } else{
@@ -27,68 +27,67 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
             }
         }
         if(arg == "--report"){
-            m_report = true;
+            m_config.report = true;
             continue;
         }
         if(arg == "--diffview"){
-            m_diffView = true;
+            m_config.diffView = true;
             continue;
         }
         if(arg == "--delay"){
             if(i + 1 < argc){
-                m_delay = std::stoi(argv[i + 1]);
-                if(m_delay < 0){
-                    m_delay = 1;
+                m_config.delay = std::stoi(argv[i + 1]);
+                m_config.delaySet = true;
+                if(m_config.delay < 0){
+                    m_config.delay = 1;
                     std::println("Error: --delay must be 0 or larger. Restored default: 1");
                 } 
-                std::println("diffview delay {}ms selected", m_delay);
+                std::println("diffview delay {}ms selected", m_config.delay);
                 i++;
                 continue;
             } else{
                 throw std::runtime_error("Option Error: --delay option needs a value (int)");
             }
         }
-        m_inPath = argv[i];
+        m_config.inPath = argv[i];
     }
-    if(m_inPath == ""){
+    validate();
+    confirmConfig();
+}
+
+
+void ArgumentParser::validate(){
+    if(m_config.inPath == ""){
         throw std::runtime_error("rias needs an input video to work on");
     }
-    std::println("Input file {} selected", m_inPath);
-
-    if(m_outPath != ""){
-        std::filesystem::path outPath(m_outPath);
+    if(m_config.outPath != ""){
+        std::filesystem::path outPath(m_config.outPath);
         std::string format = outPath.extension().string();
         if(format != ".csv"){
             throw std::runtime_error("Output File Error: rias can only output in csv format");
         }
     }else{
-        std::filesystem::path inPath(m_inPath);
-        m_outPath = inPath.replace_extension("").string() + "-result.csv";
+        std::filesystem::path inPath(m_config.inPath);
+        m_config.outPath = inPath.replace_extension("").string() + "-result.csv";
     }
-    std::println("Output file {} selected", m_outPath);
+    if(!m_config.diffView && m_config.delaySet){
+        std::println("--delay option supressed due to no --diffview flag. Proceeding with no diffview.");
+    }
 }
 
-
-const int ArgumentParser::getThreshold(){
-    return m_threshold;
+void ArgumentParser::confirmConfig(){
+    std::println("Input file {} selected", m_config.inPath);
+    std::println("Output file {} selected", m_config.outPath);
+    std::println("Threshold {} selected", m_config.threshold);
+    if(m_config.report){
+        std::println("Report set to {}", m_config.report);
+    }
+    if(m_config.diffView){
+        std::println("DiffView set to {} with delay {}ms", m_config.report, m_config.delay);
+    }
+    
 }
 
-const std::string ArgumentParser::getInPath(){
-    return m_inPath;
-}
-
-const std::string ArgumentParser::getOutPath(){
-    return m_outPath;
-}
-
-const bool ArgumentParser::getReport(){
-    return m_report;
-}
-
-const bool ArgumentParser::getDiffView(){
-    return m_diffView;
-}
-
-const int ArgumentParser::getDelay(){
-    return m_delay;
+const riasConfig& ArgumentParser::getConfig() const {
+    return m_config;
 }

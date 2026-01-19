@@ -4,6 +4,7 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include "FrameProcessor.h"
+#include "ArgumentParser.h"
 
 struct AnalysisResult{
     double timestampSec;
@@ -15,26 +16,25 @@ struct AnalysisResult{
 
 class Analyzer{
 public:
-    Analyzer(int threshold, bool reportFlag, bool diffViewFlag, int delay);
+    explicit Analyzer(const riasConfig& config);
     
-    bool analyze(const std::string& videoPath);
+    bool analyze();
     void exportCsv(const std::string& outputPath) const;
 
 private:
     FrameProcessor m_processor;
+    riasConfig m_config; 
+    size_t m_bufferIdx;
+    double m_recordedFps;
+    unsigned int m_uniqueFrames;
+
+    std::vector<uint8_t> m_fpsBuffer;
+    unsigned int m_totalFrames;
+    int m_bufferSize;
+
     std::vector<AnalysisResult> m_results;
     std::vector<AnalysisResult> m_resultsUnique;
     
-    std::vector<uint8_t> m_fpsBuffer; 
-    size_t m_bufferIdx;
-    double m_recordedFps;
-    unsigned int m_totalFrames;
-    int m_bufferSize;
-    bool m_reportFlag;
-    bool m_diffViewFlag;
-    unsigned int m_uniqueFrames;
-    int m_delay;
-
     double calculateFrametime(size_t currentBufferIdx);
     void init(const cv::VideoCapture& capture);
     void printReport(long long& loopDurationm);
