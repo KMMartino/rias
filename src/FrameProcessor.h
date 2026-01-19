@@ -10,7 +10,5 @@ public:
 private:
     int m_pixelDiffThreshold;
 
-    cv::Mat m_grayCurrent;
-    cv::Mat m_grayPrevious;
     cv::Mat m_diff;
 };

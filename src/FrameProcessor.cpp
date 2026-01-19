@@ -9,15 +9,17 @@ bool FrameProcessor::is_frame_unique(const cv::Mat& current, const cv::Mat& prev
         return false;
     }
 
-    // Convert to grayscale before processing
-    cv::cvtColor(current, m_grayCurrent, cv::COLOR_BGR2GRAY);
-    cv::cvtColor(previous, m_grayPrevious, cv::COLOR_BGR2GRAY);
+    static cv::Mat smallCur, smallPrev;
+    static cv::Mat smallCurGreen, smallPrevGreen;
+
+    cv::resize(current, smallCur, cv::Size(320, 180), 0, 0, cv::INTER_NEAREST);
+    cv::resize(previous, smallPrev, cv::Size(320, 180), 0, 0, cv::INTER_NEAREST);
+
+    cv::extractChannel(smallCur, smallCurGreen, 1);
+    cv::extractChannel(smallPrev, smallPrevGreen, 1);
 
     
-    cv::absdiff(m_grayCurrent, m_grayPrevious, m_diff);
-
-    // Binary Threshold
-    // Any pixel diff > threshold becomes 255 (white), else 0 (black)
+    cv::absdiff(smallCurGreen, smallPrevGreen, m_diff);
     cv::threshold(m_diff, m_diff, (double)m_pixelDiffThreshold, 255, cv::THRESH_BINARY);
     int non_zero = cv::countNonZero(m_diff);
 

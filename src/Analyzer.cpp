@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 #include <algorithm>
+#include <utility>
 
 Analyzer::Analyzer(const riasConfig& config)
     : m_processor(config.threshold)
@@ -25,19 +26,20 @@ bool Analyzer::analyze(){
 
     init(cap);
 
-    cv::Mat currentFrame, prevFrame;
+    cv::Mat frameBuffer1, frameBuffer2;
+
+    cv::Mat* pCurrentFrame = &frameBuffer1;
+    cv::Mat* pPrevFrame = &frameBuffer2;
 
     std::println("Starting analysis on {} frames @ {} fps...", m_totalFrames, m_recordedFps);
 
     //manually process first frame
-    cap >> currentFrame;
-    if(currentFrame.empty()) return false;
+    cap >> *pPrevFrame;
+    if(pPrevFrame->empty()) return false;
 
     m_uniqueFrames = 1;
     m_fpsBuffer[0] = 1;
     m_bufferIdx = 1;
-
-    prevFrame = currentFrame.clone();
     
     cv::Mat lastUniqueDiffBgr;
     int consecutiveDupes;
@@ -46,23 +48,22 @@ bool Analyzer::analyze(){
     int frameCounter = 1;
     auto loopTimeStart = std::chrono::high_resolution_clock::now();
     while(true){  
-        cap >> currentFrame;
-        if(currentFrame.empty()) break;
+        cap >> *pCurrentFrame;
+        if(pCurrentFrame->empty()) break;
         
         bool unique = 0;
 
-        if(m_processor.is_frame_unique(currentFrame, prevFrame)){
+        if(m_processor.is_frame_unique(*pCurrentFrame, *pPrevFrame)){
             unique = 1;
             m_uniqueFrames++;
         }
-        prevFrame = currentFrame.clone();
         m_fpsBuffer[m_bufferIdx] = unique;
 
         process(frameCounter, unique);
         frameCounter ++;
 
         if(m_config.diffView){
-            diffView(consecutiveDupes, lastUniqueDiffBgr, currentFrame, unique);
+            diffView(consecutiveDupes, lastUniqueDiffBgr, *pCurrentFrame, unique);
             int key = cv::waitKey(m_config.delay);
         
             if (key == 27 || key == 'q' || key == 'Q') {
@@ -70,6 +71,8 @@ bool Analyzer::analyze(){
                 break;
             }
         }
+
+        std::swap(pPrevFrame, pCurrentFrame);
     }
     auto loopTimeEnd = std::chrono::high_resolution_clock::now();
 
