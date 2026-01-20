@@ -278,5 +278,4 @@ void Analyzer::diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::M
         cv::merge(channels, coloredFrame);
         cv::imshow("Preview", coloredFrame);
     }
-    cv::waitKey(m_config.delay);
 }

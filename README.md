@@ -59,6 +59,4 @@ Time(s), fps, frametime
 * If it detects that the frames are similar enough, it will record a long frametime / low framerate.
 
 ## Todo
-* Add --tuning option
-    * Input pass in user hand counted framerate so the program can tell you if your threshold is set correctly.
 * Add framerate visualization / graphing tools.
