@@ -60,6 +60,12 @@ bool Analyzer::analyze(){
         m_fpsBuffer[m_bufferIdx] = unique;
 
         process(frameCounter, unique);
+
+        if(m_config.tuningSet == true && frameCounter == m_bufferSize - 1){
+            std::println("\nTuning limit reached. Stopping analysis.");
+            break;
+        }
+
         frameCounter ++;
 
         if(m_config.diffView){
@@ -75,9 +81,13 @@ bool Analyzer::analyze(){
         std::swap(pPrevFrame, pCurrentFrame);
     }
     auto loopTimeEnd = std::chrono::high_resolution_clock::now();
-
     auto loopDuration = std::chrono::duration_cast<std::chrono::milliseconds>(loopTimeEnd - loopTimeStart).count();
-    printReport(loopDuration);
+    
+    if(m_config.tuningSet == true){
+        printTuningReport();
+    }else{
+        printReport(loopDuration);
+    }
     
     return true;
 }
@@ -176,6 +186,28 @@ void Analyzer::printReport(long long& loopDuration){
     }
     
     std::println("Analysis Complete.");
+}
+
+void Analyzer::printTuningReport(){
+    int diff = m_uniqueFrames - m_config.tuning;
+    std::println("----------\ntuning report\n");
+    std::println("Target FPS: {}", m_config.tuning);
+    std::println("Detected FPS: {}", m_uniqueFrames);
+    std::println("Threshold Used: {}\n", m_config.threshold);
+
+    if(diff == 0){
+        std::println("RESULT: PERFECT MATCH");
+        std::println(">> This threshold is accurate for this footage.");
+    }
+    if(diff > 0){
+        std::println("RESULT: ADJUSTMENT REQUIRED");
+        std::println(">> Rias overcounted by {} at threshold {}. Try setting a higher threshold", diff, m_config.threshold);
+    }
+    if(diff < 0){
+        std::println("RESULT: ADJUSTMENT REQUIRED");
+        std::println(">> Rias undercounted by {} at threshold {}. Try setting a lower threshold", -diff, m_config.threshold);
+    }
+    std::println("\nreport end\n----------");
 }
 
 double Analyzer::getLowFps(const std::map<unsigned int, int>& histogram, double percentile){

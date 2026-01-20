@@ -26,23 +26,28 @@ This will output a csv file "filename-results.csv" containing
 Time(s), fps, frametime
 
 ## Flags
-### --threshold (int 0-255, default: 30)
+### --threshold (int 0-255, default: 30, *flag parameter required*)
 * Usage: --threshold int
 * The amount that a grayscale pixel between frames can differ before it is counted as different, thus triggering a new frame. Higher values allow more noise before a new frame is triggered, thus lowering the framerate.
-### --output (string xyz.csv, default: <input_file_name>-result.csv)
+### --output (string xyz.csv, default: <input_file_name>-result.csv, *flag parameter required*)
 * Usage: --output string
 * Sets the output file name. Probably the location too if you pass path/file.csv in. I'm not really sure. Also it will override files without notice (only csv). Be careful.
-### --report
+### --report (*no flag parameter*)
 * Usage: --report
 * Tells the program to print out a detailed report of things like 1% and 0.1% percentile frames, the number of major stutters, etc... Think of it like a --verbose flag for other programs. Also I thought it would be cool to implement a sorting algorithm from scratch in C++. Since boot.dev made me do it in python. Nevemind. I ended up using a map rather than a proper sorting algorithm. 
-### --diffview
+### --diffview (*no flag parameter*)
 * Usage --diffview
-* Opens a window to display the frame diffs (changed pixels shown white. Everything else black). If the same frame is shown more than once, it replays the last diff but in yellow, then red for any more. This process depends on your PC spec and can be very fast and impossible to decipher. Use with the following --delay option to mitigate this.
+* Opens a window to display the frame diffs (pixel diffs shown in BGR. Everything else black). If the same frame is shown more than once, it replays the last diff but in yellow, then red for any more. This process depends on your PC spec and can be very fast and impossible to decipher. Use with the following --delay option to mitigate this.
 * Compared to the standard operations this will significantly hurt performance.
-### --delay (int >= 0, default: 1)
+### --delay (int >= 0, default: 1, *flag parameter required*)
 * Usage --delay int
 * Use with the above --diffview; adds a delay to displaying the diff frame to make the output more readable. The delay is in ms. Selecting 0 will enter a different mode where the program will not proceed to processing the next frame until user input(spacebar). Holding the input will make the program proceed as normal. 
 * Selecting a high delay will make the program take for ever to finish executing. You can press esc to exit early. You may have to mash it a bit. It's a bit janky.
+### --tuning (int 0-videofps, no default, *flag parameter required*)
+* Usage --tuning int
+* Runs the program in a mode where it only counts the first 1 sec worth of frames, and compares the number to the provided flag parameter. It will recommend a different --threshold to use based on the results.
+* Best used with the --threshold option to test different threshold values and make sure the framerate counting is accurate.
+* **Important** If you use lossless video as the input the default threshold should be perfectly fine. While the tuning option is here, numbers produced by this program for a lossy input file, even if tuned, should not be considered reliable.
 
 ## Framerate calculation quirks
 * Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored

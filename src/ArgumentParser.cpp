@@ -10,7 +10,6 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
         if(arg == "--threshold"){
             if(i + 1 < argc){
                 m_config.threshold = std::stoi(argv[i + 1]);
-                std::println("Threshold {} selected", m_config.threshold);
                 i++;
                 continue;
             } else{
@@ -38,11 +37,16 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
             if(i + 1 < argc){
                 m_config.delay = std::stoi(argv[i + 1]);
                 m_config.delaySet = true;
-                if(m_config.delay < 0){
-                    m_config.delay = 1;
-                    std::println("Error: --delay must be 0 or larger. Restored default: 1");
-                } 
-                std::println("diffview delay {}ms selected", m_config.delay);
+                i++;
+                continue;
+            } else{
+                throw std::runtime_error("Option Error: --delay option needs a value (int)");
+            }
+        }
+        if(arg == "--tuning"){
+            if(i + 1 < argc){
+                m_config.tuning = std::stoi(argv[i + 1]);
+                m_config.tuningSet = true;
                 i++;
                 continue;
             } else{
@@ -58,8 +62,13 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
 
 void ArgumentParser::validate(){
     if(m_config.inPath == ""){
-        throw std::runtime_error("rias needs an input video to work on");
+        throw std::runtime_error("Input File Error: rias needs an input video to work on");
     }
+
+    if(m_config.threshold < 0 || m_config.threshold > 255){
+        throw std::runtime_error("Option Error: --threshold option value must be an int 0-255");
+    }
+
     if(m_config.outPath != ""){
         std::filesystem::path outPath(m_config.outPath);
         std::string format = outPath.extension().string();
@@ -70,13 +79,23 @@ void ArgumentParser::validate(){
         std::filesystem::path inPath(m_config.inPath);
         m_config.outPath = inPath.replace_extension("").string() + "-result.csv";
     }
+
     if(!m_config.diffView && m_config.delaySet){
         std::println("--delay option supressed due to no --diffview flag. Proceeding with no diffview.");
+    }
+
+    if(m_config.delay < 0){
+        m_config.delay = 1;
+        std::println("Option Warning: --delay must be an int 0 or larger. Proceeding with default: 1");
+    }
+
+    if(m_config.tuning < 0){
+        throw std::runtime_error("Option Error: --tuning option value must be between 0 and the recording fps");
     }
 }
 
 void ArgumentParser::confirmConfig(){
-    std::println("Input file {} selected", m_config.inPath);
+    std::println("\nInput file {} selected", m_config.inPath);
     std::println("Output file {} selected", m_config.outPath);
     std::println("Threshold {} selected", m_config.threshold);
     if(m_config.report){
@@ -85,7 +104,9 @@ void ArgumentParser::confirmConfig(){
     if(m_config.diffView){
         std::println("DiffView set to {} with delay {}ms", m_config.report, m_config.delay);
     }
-    
+    if(m_config.tuningSet){
+        std::println("Tuning mode starting with reference {}fps", m_config.tuning);
+    }
 }
 
 const riasConfig& ArgumentParser::getConfig() const {

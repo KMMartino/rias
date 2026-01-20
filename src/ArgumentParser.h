@@ -10,6 +10,8 @@ struct riasConfig{
     bool diffView = false;
     int delay = 1;
     bool delaySet = false;
+    int tuning = 60;
+    bool tuningSet = false;
 };
 
 class ArgumentParser{

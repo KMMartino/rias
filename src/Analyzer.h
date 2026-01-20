@@ -37,7 +37,8 @@ private:
     
     double calculateFrametime(size_t currentBufferIdx);
     void init(const cv::VideoCapture& capture);
-    void printReport(long long& loopDurationm);
+    void printReport(long long& loopDuration);
+    void printTuningReport();
     double getLowFps(const std::map<unsigned int, int>& histogram, double percentile);
     void process(const int& frameCounter, const bool& unique);
     void diffView(int& consecutiveDupes, cv::Mat& lastUniqueDiffBgr, cv::Mat& currentFrame, cv::Mat& previousFrame, bool unique);
