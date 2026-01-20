@@ -59,4 +59,5 @@ Time(s), fps, frametime
 * If it detects that the frames are similar enough, it will record a long frametime / low framerate.
 
 ## Todo
-* Add framerate visualization / graphing tools.
+* Major: Add framerate visualization / graphing tools.
+* Add tool to automatically sync analysis video and full quality video.

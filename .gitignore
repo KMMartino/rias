@@ -29,7 +29,6 @@ vcpkg_installed/
 Thumbs.db
 
 # test related
-test.avi
+*.mkv
 *.csv
 PERFORMANCE.md
-*.ps1
