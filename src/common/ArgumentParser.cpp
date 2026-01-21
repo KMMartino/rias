@@ -33,6 +33,10 @@ ArgumentParser::ArgumentParser(int argc, char* argv[]){
             m_config.diffView = true;
             continue;
         }
+        if(arg == "--mono"){
+            m_config.mono = true;
+            continue;
+        }
         if(arg == "--delay"){
             if(i + 1 < argc){
                 m_config.delay = std::stoi(argv[i + 1]);

@@ -3,7 +3,7 @@
 #include <vector>
 
 struct riasConfig{
-    int threshold = 30;
+    int threshold = 20;
     std::string inPath = "";
     std::string outPath = "";
     bool report = false;
@@ -12,6 +12,7 @@ struct riasConfig{
     bool delaySet = false;
     int tuning = 60;
     bool tuningSet = false;
+    bool mono = false;
 };
 
 class ArgumentParser{

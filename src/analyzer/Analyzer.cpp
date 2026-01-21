@@ -41,8 +41,8 @@ bool Analyzer::analyze(){
     m_fpsBuffer[0] = 1;
     m_bufferIdx = 1;
     
-    cv::Mat lastUniqueDiffBgr;
-    int consecutiveDupes;
+    cv::Mat lastUniqueDiffBgr = cv::Mat::zeros(pPrevFrame->size(), pPrevFrame->type());
+    int consecutiveDupes = 0;
 
     //process rest of the frames
     int frameCounter = 1;
