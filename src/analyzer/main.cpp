@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
         riasConfig config = parser.getConfig();
         Analyzer analyzer(config);
         if (analyzer.analyze()) {
-            analyzer.exportCsv(config.outPath);
+            analyzer.exportCsv_full(config.outPath);
         }
 
         auto programTimeEnd = std::chrono::high_resolution_clock::now();

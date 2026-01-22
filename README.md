@@ -16,12 +16,16 @@ Test files included in files as example of the 2 video analysis structure. fr is
 ## Requirements
 * C++23 Compiler
 * CMake 3.25+
-* OpenCV (via vcpkg)
-
+* OpenCV 4.x (via vcpkg)
+    * *Required Modules:* `ffmpeg`, `freetype`, `contrib`
+### Installing Dependencies (vcpkg)
+```powershell
+vcpkg install "opencv[ffmpeg,freetype,contrib]:x64-windows" --recurse
+```
 ## Build
 ```bash
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=your_vcpkg.cmake_location
-cmake --build build
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --config release
 ```
 
 ## Usage
@@ -29,10 +33,10 @@ cmake --build build
 **You need Lossless video for this to work!!**
 
 ```bash
-./rias.exe --flags filepath_to_input_video
+./rias-analyzer.exe --flags filepath_to_input_video
 ```
 This will output a csv file "filename-results.csv" containing 
-Time(s), fps, frametime
+Time(s), fps, frametime(ms), unique(bool)
 
 ## Flags
 ### --threshold (int 0-255, default: 20, *flag parameter required*)
@@ -76,3 +80,4 @@ Time(s), fps, frametime
 * Major: Add framerate visualization / graphing tools.
 * Add tool to automatically sync analysis video and full quality video.
 * Add a flag --mono to switch between intended mode and single input mode.
+* Add support for 30 and 120fps video (currently assumes 60fps recording)

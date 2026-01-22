@@ -139,6 +139,28 @@ void Analyzer::exportCsv(const std::string& outputPath) const {
     std::println("Exported CSV to: {}", outputPath);
 }
 
+void Analyzer::exportCsv_full(const std::string& outputPath) const {
+    std::ofstream file(outputPath);
+    if(!file.is_open()){
+        std::println(stderr, "Failed to open output file: {}", outputPath);
+        return;
+    }
+
+    file << "Time(s),fps(total),fps(current),Frametime(ms),Unique(bool)\n";
+    double baseFrametime = 1000.0 / m_recordedFps;
+    double frameDuration = baseFrametime;
+
+    for(const auto& res: m_results){
+        if(res.uniqueFrame){
+            frameDuration = baseFrametime;
+        }else{
+            frameDuration += baseFrametime;
+        }
+        file << std::format("{:.3f},{:.1f},{:.1f},{:.2f},{}\n", res.timestampSec, res.totalAverageFramerate, res.currentFps, frameDuration, res.uniqueFrame);
+    }
+    std::println("Exported CSV to: {}", outputPath);
+}
+
 void Analyzer::init(const cv::VideoCapture& capture){
     m_recordedFps = capture.get(cv::CAP_PROP_FPS);
     if (m_recordedFps <= 0) m_recordedFps = 60;

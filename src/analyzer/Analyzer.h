@@ -20,6 +20,7 @@ public:
     
     bool analyze();
     void exportCsv(const std::string& outputPath) const;
+    void exportCsv_full(const std::string& outputPath) const;
 
 private:
     FrameProcessor m_processor;
