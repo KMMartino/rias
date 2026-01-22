@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(OpenCV REQUIRED)
 
 add_library(rias_common STATIC
-    src/common/ArgumentParser.cpp
+    src/common/dummy.cpp
 )
 target_include_directories(rias_common PUBLIC src/common)
 
@@ -18,12 +18,14 @@ add_executable(rias-analyzer
     src/analyzer/main.cpp
     src/analyzer/Analyzer.cpp
     src/analyzer/FrameProcessor.cpp
+    src/analyzer/ArgumentParser.cpp
 )
 target_include_directories(rias-analyzer PRIVATE src/analyzer)
 target_link_libraries(rias-analyzer PRIVATE rias_common ${OpenCV_LIBS})
 
 add_executable(rias-visualizer 
     src/visualizer/main.cpp
+    src/visualizer/Graphing.cpp
 )
 target_include_directories(rias-visualizer PRIVATE src/visualizer)
 target_link_libraries(rias-visualizer PRIVATE rias_common ${OpenCV_LIBS})
