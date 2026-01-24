@@ -1,3 +1,4 @@
+#pragma once
 #include <deque>
 #include <opencv2/opencv.hpp>
 #include <opencv2/freetype.hpp>
@@ -27,11 +28,10 @@ struct GraphStyle {
 
 class Graphing{
 public:
-    Graphing(int vidWidth, int vidHeight, int vidFPS, const std::vector<FrameData>& fullData);
+    Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameData>&& fullData);
 
     void manageStats();
     int draw(cv::Mat& canvas);
-    GraphStyle getStyle();
 
 private:
     GraphStyle m_style;
@@ -40,4 +40,8 @@ private:
     FrameData m_current;
     int m_frameIdx;
     std::vector<FrameData> m_fullData;
+    cv::Mat m_bgLayer;
+    cv::Mat m_polyLayer;
+    std::vector<cv::Point> m_pointsGlobal;
+    std::vector<cv::Point> m_pointsLocal;
 };

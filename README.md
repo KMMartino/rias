@@ -1,4 +1,4 @@
-# rias-V2 - 0.0.1
+# rias-V2
 This is "fRametIme anAlySis", or rias, a lightweight, CLI-based frametime / framerate analysis tool written in C++. 
 Inspired by [trdrop](https://github.com/cirreth/trdrop), but stripped down for simple use. Tear detection is also not included.
 
@@ -38,7 +38,7 @@ cmake --build build --config release
 This will output a csv file "filename-results.csv" containing 
 Time(s), fps, frametime(ms), unique(bool)
 ```bash
-./rias-visualizer.exe filepath_to_input_video filepath_to_csv_file
+./rias-visualizer.exe --flags filepath_to_input_video filepath_to_csv_file
 ```
 This takes in an input video and expoted csv file and placed a graph based on the csv on the input video. It is assumed that you have a high resolution lossy video and a low resolution lossless video recorded simultaneously. The frametime analysis is done based on the lossless file and the nice looking high res video with the overlay is based on the high res video. This simultaneous recording is normally done using the obs source record plugin. The plugin produces a recording that is a frame or two off so rias-visualizer includes logic to sync the video streams. While using a single high resolution lossless video is possible, it is not recommended due to storage space inefficiency.
 
@@ -71,7 +71,13 @@ This takes in an input video and expoted csv file and placed a graph based on th
 * V2 of rias assumes that you have a high res lossy file and a low res lossless file. This will be the default moving forward, but --mono is here in case you have a high res lossless file.
 
 ## Flags (rias-visualizer)
-### ---
+### --output (string xyz.csv, default: <input_file_name>-result.csv, *flag parameter required*)
+* Usage: --output string
+* Sets the output file name. Probably the location too if you pass path/file.csv in. I'm not really sure. Also it will override files without notice (only mp4). Be careful.
+### --mono (*no flag parameter*)
+* Usage --mono
+* No function defined yet
+
 
 ## Framerate calculation quirks
 * Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored

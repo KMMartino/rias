@@ -2,8 +2,8 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <print>
+#include <cstdlib>
 
 struct FrameData {
     double timestamp;
@@ -16,6 +16,7 @@ class CsvLoader {
 public:
     static std::vector<FrameData> load(const std::string& path) {
         std::vector<FrameData> data;
+        data.reserve(10000);
         std::ifstream file(path);
         
         if (!file.is_open()) {
@@ -25,21 +26,17 @@ public:
 
         std::string line;
         std::getline(file, line); 
+        char* endPtr;
+        const char* linePtr;
 
         while (std::getline(file, line)) {
-            std::stringstream ss(line);
-            std::string cell;
             FrameData frame;
+            linePtr = line.c_str();
 
-            // Helper to parse comma-separated doubles
-            auto getNext = [&](double& val) {
-                if (std::getline(ss, cell, ',')) val = std::stod(cell);
-            };
-
-            getNext(frame.timestamp);
-            getNext(frame.fpsTotal);
-            getNext(frame.fpsCurrent);
-            getNext(frame.frametime);
+            frame.timestamp = std::strtod(linePtr, &endPtr);
+            frame.fpsTotal = std::strtod(endPtr + 1, &endPtr);
+            frame.fpsCurrent = std::strtod(endPtr + 1, &endPtr);
+            frame.frametime = std::strtod(endPtr + 1, &endPtr);
             
             data.push_back(frame);
         }

@@ -26,6 +26,9 @@ target_link_libraries(rias-analyzer PRIVATE rias_common ${OpenCV_LIBS})
 add_executable(rias-visualizer 
     src/visualizer/main.cpp
     src/visualizer/Graphing.cpp
+    src/visualizer/v_ArgumentParser.cpp
+    src/visualizer/FFmpegPipe.cpp
+    src/visualizer/Renderer.cpp
 )
 target_include_directories(rias-visualizer PRIVATE src/visualizer)
 target_link_libraries(rias-visualizer PRIVATE rias_common ${OpenCV_LIBS})
