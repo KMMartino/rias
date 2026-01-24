@@ -10,6 +10,7 @@ Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameDat
 }
 
 void Graphing::manageStats(){
+    if (m_fullData.empty()) return;
     if (m_frameIdx < m_fullData.size()) {
         m_current = m_fullData[m_frameIdx];
     } else if (!m_fullData.empty()) {
@@ -59,14 +60,11 @@ int Graphing::draw(cv::Mat& canvas){
     m_pointsLocal.push_back(cv::Point(m_style.width, m_style.height));
 
     m_polyLayer.create(roi.size(), roi.type());
-    roi.copyTo(m_polyLayer);
-    const cv::Point* ppt[1] = {m_pointsLocal.data()};
-    int npt[] = {(int)m_pointsLocal.size()};
-    cv::fillPoly(m_polyLayer, ppt, npt, 1, cv::Scalar(0, 200, 0), cv::LINE_AA);
-    cv::addWeighted(m_polyLayer, 0.5, roi, 0.5, 0, roi);
+    m_polyLayer.setTo(cv::Scalar(0, 0, 0));
+    cv::addWeighted(m_polyLayer, 0.5, roi, 1, 0, roi);
 
-    int y60 = getY(16.66);
-    int y30 = getY(33.33);
+    int y60 = graphRect.y + getY(16.66);
+    int y30 = graphRect.y + getY(33.33);
 
     cv::line(canvas, cv::Point(graphRect.x, y60), cv::Point(graphRect.x + m_style.width, y60), cv::Scalar(100, 255, 100), 2);
     cv::line(canvas, cv::Point(graphRect.x, y30), cv::Point(graphRect.x + m_style.width, y30), cv::Scalar(100, 100, 255), 1);

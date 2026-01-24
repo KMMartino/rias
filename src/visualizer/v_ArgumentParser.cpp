@@ -17,6 +17,17 @@ v_ArgumentParser::v_ArgumentParser(int argc, char* argv[]){
                 throw std::runtime_error("Option Error: --output option needs a value (filename.csv)");
             }
         }
+        if(arg == "--encoder"){
+            if(i + 1 < argc){
+                std::string val = argv[i + 1];
+                if (val == "nvenc") m_config.encoder = EncoderType::NVENC;
+                else if (val == "vce" || val == "amf") m_config.encoder = EncoderType::AMF;
+                else m_config.encoder = EncoderType::CPU;
+                i++; continue;
+            } else{
+                throw std::runtime_error("Option Error: --output option needs a value (filename.csv)");
+            }
+        }
         if(arg == "--mono"){
             m_config.mono = true;
             continue;

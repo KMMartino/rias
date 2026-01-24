@@ -1,13 +1,34 @@
 #include "FFmpegPipe.h"
-#include "v_ArgumentParser.h"
 
 
-FFmpegPipe::FFmpegPipe(int width, int height, int fps, const std::string& outPath){
+FFmpegPipe::FFmpegPipe(int width, int height, int fps, const visualizerConfig& config){
+    std::string codecOpts;
+
+    switch (config.encoder) {
+        case EncoderType::NVENC:
+            std::println("Encoder: NVIDIA NVENC (h264_nvenc)");
+            codecOpts = "-c:v h264_nvenc -preset p4 -rc constqp -qp 20";
+            break;
+
+        case EncoderType::AMF:
+            std::println("Encoder: AMD AMF (h264_amf)");
+            codecOpts = "-c:v h264_amf -usage transcoding -rc cqp -qp_i 20 -qp_p 20 -qp_b 20";
+            break;
+
+        case EncoderType::CPU:
+        default:
+            std::println("Encoder: CPU (libx264)");
+            codecOpts = "-c:v libx264 -preset fast -crf 18";
+            break;
+    }
     
     std::string cmd = std::format(
-        "ffmpeg -y -loglevel error -f rawvideo -vcodec rawvideo -pix_fmt bgr24 -s {}x{} -r {} -i - "
-        "-c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p \"{}\"", 
-        width, height, fps, outPath
+        "ffmpeg -y -loglevel error "
+        "-f rawvideo -vcodec rawvideo -pix_fmt bgr24 -s {}x{} -r {} -i - "
+        "-i \"{}\" "
+        "-map 0:v -map 1:a? -c:a copy -shortest "
+        "{} -pix_fmt yuv420p \"{}\"",
+        width, height, fps, config.videoPath, codecOpts, config.outPath
     );
     std::println("Opening FFmpeg Pipe: {}", cmd);
 

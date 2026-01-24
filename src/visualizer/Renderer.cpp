@@ -16,7 +16,7 @@ Renderer::Renderer(const visualizerConfig& config)
 
 void Renderer::run(){
     Graphing grapher = Graphing(m_width, m_height, m_fps, CsvLoader::load(m_config.csvPath));
-    FFmpegPipe encoder = FFmpegPipe(m_width, m_height, m_fps, m_config.outPath);
+    FFmpegPipe encoder = FFmpegPipe(m_width, m_height, m_fps, m_config);
     cv::Mat frame;
     std::println("Rendering {} frames...", m_totalFrames);
     while (true) {

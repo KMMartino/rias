@@ -2,10 +2,17 @@
 #include <string>
 #include <vector>
 
+enum class EncoderType {
+    CPU,
+    NVENC,
+    AMF
+};
+
 struct visualizerConfig{
     std::string videoPath = "";
     std::string csvPath = "";
     std::string outPath = "";
+    EncoderType encoder = EncoderType::CPU;
     bool mono = false;
 };
 

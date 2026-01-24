@@ -74,6 +74,10 @@ This takes in an input video and expoted csv file and placed a graph based on th
 ### --output (string xyz.csv, default: <input_file_name>-result.csv, *flag parameter required*)
 * Usage: --output string
 * Sets the output file name. Probably the location too if you pass path/file.csv in. I'm not really sure. Also it will override files without notice (only mp4). Be careful.
+### --encoder (string option, default: cpu, *flag parameter required*)
+* Usage --encoder option
+* Options are cpu, nvenc, amf, and vce. The last 2 are the same thing.
+* This allows GPU encoding for the output video.
 ### --mono (*no flag parameter*)
 * Usage --mono
 * No function defined yet
@@ -93,3 +97,4 @@ This takes in an input video and expoted csv file and placed a graph based on th
 * Add tool to automatically sync analysis video and full quality video.
 * Add a flag --mono to switch between intended mode and single input mode.
 * Add support for 30 and 120fps video (currently assumes 60fps recording)
+* Add orchestrator
