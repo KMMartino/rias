@@ -29,6 +29,7 @@ add_executable(rias-visualizer
     src/visualizer/v_ArgumentParser.cpp
     src/visualizer/FFmpegPipe.cpp
     src/visualizer/Renderer.cpp
+    src/visualizer/Plot.cpp
 )
 target_include_directories(rias-visualizer PRIVATE src/visualizer)
 target_link_libraries(rias-visualizer PRIVATE rias_common ${OpenCV_LIBS})

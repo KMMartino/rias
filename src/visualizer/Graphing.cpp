@@ -2,77 +2,115 @@
 #include <algorithm>
 
 Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameData>&& fullData)
-    :m_style(vidWidth, vidHeight, vidFPS), m_ft2(cv::freetype::createFreeType2()), m_frameIdx(0), m_fullData(std::move(fullData))
+    :m_ft2(cv::freetype::createFreeType2()), m_frameIdx(0), m_fullData(std::move(fullData)), m_videoFPS(vidFPS)
 {
-    m_ft2->loadFontData("C:/Windows/Fonts/arial.ttf", 0);
-    m_pointsGlobal.reserve(m_style.historySize + 2);
-    m_pointsLocal.reserve(m_style.historySize + 2);
+    try {
+        m_ft2->loadFontData("C:/Windows/Fonts/arialbd.ttf", 0);
+    } catch (...) {
+        try { m_ft2->loadFontData("C:/Windows/Fonts/arial.ttf", 0); } catch(...) {}
+    }
+
+    int margin = (int)(vidWidth * 0.02);
+    int contentWidth = vidWidth - (2 * margin);
+
+    PlotStyle fpsStyle;
+    int fpsHeight = (int)(vidHeight * 0.18);
+    fpsStyle.rect = cv::Rect(margin, vidHeight - margin - fpsHeight, contentWidth, fpsHeight);
+    
+    fpsStyle.minVal = 0.0;
+    fpsStyle.maxVal = vidFPS;
+    double gridLineRef = (double)vidFPS * 0.25;
+    fpsStyle.gridLines = { gridLineRef, gridLineRef * 2, gridLineRef * 3, gridLineRef * 4 };
+    fpsStyle.title = "FRAME-RATE (FPS)";
+    fpsStyle.alignTitleRight = true;
+    fpsStyle.lineColor = cv::Scalar(100, 255, 100);
+    fpsStyle.fillColor = cv::Scalar(0, 200, 0);
+    fpsStyle.historySize = vidFPS * 5;
+
+    m_fpsPlot = std::make_unique<Plot>(fpsStyle);
+
+    PlotStyle ftStyle;
+    int ftHeight = (int)(vidHeight * 0.15);
+    int ftWidth  = (int)(vidWidth * 0.20);
+    
+    ftStyle.rect = cv::Rect(margin, fpsStyle.rect.y - margin - ftHeight, ftWidth, ftHeight);
+    
+    double frametimeBase = 1000.0 / vidFPS;
+    ftStyle.minVal = 0.0;
+    ftStyle.maxVal = frametimeBase * 3;
+    ftStyle.gridLines = { frametimeBase, frametimeBase * 2 };
+    ftStyle.title = "FRAME-TIME (MS)";
+    ftStyle.alignTitleRight = false;
+    ftStyle.lineColor = cv::Scalar(100, 100, 255);
+    ftStyle.fillColor = cv::Scalar(0, 0, 200);
+    ftStyle.historySize = vidFPS * 2;
+
+    m_frametimePlot = std::make_unique<Plot>(ftStyle);
+
+    auto getClampedData = [&](int idx) -> const FrameData& {
+        if (idx < 0) return m_fullData.front();
+        if (static_cast<size_t>(idx) >= m_fullData.size()) return m_fullData.back();
+        return m_fullData[idx];
+    };
+
+    int fpsOffset = (int)(vidFPS * 2.5);
+    for (int i = 0; i < fpsStyle.historySize - 1; i++) {
+        int frameToLoad = i - (fpsStyle.historySize - 1) + fpsOffset;
+        m_fpsPlot->addValue(getClampedData(frameToLoad).fpsCurrent);
+    }
+
+    int ftOffset = m_videoFPS;
+    for (int i = 0; i < ftStyle.historySize - 1; i++) {
+        int frameToLoad = i - (ftStyle.historySize - 1) + ftOffset;
+        m_frametimePlot->addValue(getClampedData(frameToLoad).frametime);
+    }
 }
 
 void Graphing::manageStats(){
     if (m_fullData.empty()) return;
     if (m_frameIdx < m_fullData.size()) {
         m_current = m_fullData[m_frameIdx];
-    } else if (!m_fullData.empty()) {
+    } else {
         m_current = m_fullData.back();
-    }
-
-    m_historyWindow.push_back(m_current);
-    if (m_historyWindow.size() > m_style.historySize) {
-        m_historyWindow.pop_front();
     }
 }
 
-int Graphing::draw(cv::Mat& canvas){
+int Graphing::draw(cv::Mat& canvas) {
     manageStats();
 
-    cv::Rect graphRect(m_style.padding, canvas.rows - m_style.height - m_style.padding, m_style.width, m_style.height);
-    cv::Mat roi = canvas(graphRect);
-
-    m_bgLayer.create(roi.size(), roi.type());
-    m_bgLayer.setTo(cv::Scalar(20, 20, 20));
-    cv::addWeighted(m_bgLayer, 0.7, roi, 0.3, 0, roi);
-
-    m_pointsGlobal.clear();
-    m_pointsLocal.clear();
-
-    auto getY = [&](double ms){
-        double clamped = std::max(0.0, std::min(ms, m_style.maxMs));
-        double ratio = clamped / m_style.maxMs;
-        return m_style.height - (int)(ratio * m_style.height);
+    auto getDataAt = [&](int idx) -> FrameData {
+    if (idx < 0) return m_fullData.front();
+    if (static_cast<size_t>(idx) >= m_fullData.size()) return m_fullData.back();
+    return m_fullData[idx];
     };
 
-    m_pointsGlobal.push_back(cv::Point(graphRect.x, graphRect.y + m_style.height));
-    m_pointsLocal.push_back(cv::Point(0, m_style.height));
-
-    int currentSize = (int)m_historyWindow.size();
-
-    for (size_t i = 0; i < currentSize; ++i) {
-        int xOffset = (int)((double)i / (m_style.historySize - 1) * m_style.width);
-        
-        int yLocal = getY(m_historyWindow[i].frametime);
-        
-        m_pointsLocal.push_back(cv::Point(xOffset, yLocal));
-        m_pointsGlobal.push_back(cv::Point(graphRect.x + xOffset, graphRect.y + yLocal));
+    if (m_frametimePlot) {
+        FrameData future = getDataAt(m_frameIdx + m_videoFPS);
+        m_frametimePlot->addValue(future.frametime);
     }
 
-    m_pointsGlobal.push_back(cv::Point(graphRect.x + m_style.width, graphRect.y + m_style.height));
-    m_pointsLocal.push_back(cv::Point(m_style.width, m_style.height));
+    if (m_fpsPlot) {
+        FrameData future = getDataAt(m_frameIdx + m_videoFPS * 2.5);
+        m_fpsPlot->addValue(future.fpsCurrent);
+    }
 
-    m_polyLayer.create(roi.size(), roi.type());
-    m_polyLayer.setTo(cv::Scalar(0, 0, 0));
-    cv::addWeighted(m_polyLayer, 0.5, roi, 1, 0, roi);
+    if (m_fpsPlot)       m_fpsPlot->draw(canvas, m_ft2);
+    if (m_frametimePlot) m_frametimePlot->draw(canvas, m_ft2);
 
-    int y60 = graphRect.y + getY(16.66);
-    int y30 = graphRect.y + getY(33.33);
-
-    cv::line(canvas, cv::Point(graphRect.x, y60), cv::Point(graphRect.x + m_style.width, y60), cv::Scalar(100, 255, 100), 2);
-    cv::line(canvas, cv::Point(graphRect.x, y30), cv::Point(graphRect.x + m_style.width, y30), cv::Scalar(100, 100, 255), 1);
-
-    m_ft2->putText(canvas, "16.6ms", cv::Point(graphRect.x + 10, y60 - 5), m_style.fontSizeTitle, cv::Scalar(150, 255, 150), -1, cv::LINE_AA, true);
-    m_ft2->putText(canvas, "33.3ms", cv::Point(graphRect.x + 10, y30 - 5), m_style.fontSizeLabel, cv::Scalar(150, 150, 255), -1, cv::LINE_AA, true);
-
-    cv::polylines(canvas, m_pointsGlobal, false, cv::Scalar(100, 255, 100), 1, cv::LINE_AA);
+    if (m_ft2) {
+        std::string bigFps = std::format("{:.0f}", m_current.fpsCurrent);
+        
+        int bigSize = (int)(canvas.rows * 0.08); 
+        
+        int baseline = 0;
+        cv::Size textSize = m_ft2->getTextSize(bigFps, bigSize, -1, &baseline);
+        
+        int margin = (int)(canvas.cols * 0.015);
+        cv::Point pos(canvas.cols - margin - textSize.width, margin + textSize.height);
+        
+        m_ft2->putText(canvas, bigFps, pos + cv::Point(3,3), bigSize, cv::Scalar(0,0,0), -1, cv::LINE_AA, true);
+        m_ft2->putText(canvas, bigFps, pos, bigSize, cv::Scalar(255, 255, 255), -1, cv::LINE_AA, true);
+    }
 
     m_frameIdx++;
     return m_frameIdx;
