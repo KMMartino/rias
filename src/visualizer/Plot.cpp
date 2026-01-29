@@ -1,4 +1,5 @@
 #include "Plot.h"
+#include <format>
 
 Plot::Plot(const PlotStyle& style)
     : m_style(style) {

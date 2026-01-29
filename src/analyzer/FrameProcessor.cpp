@@ -1,7 +1,7 @@
 #include "FrameProcessor.h"
 
-FrameProcessor::FrameProcessor(int pixel_diff_threshold)
-    : m_pixelDiffThreshold(pixel_diff_threshold) {
+FrameProcessor::FrameProcessor(int pixelDiffThreshold)
+    : m_pixelDiffThreshold(pixelDiffThreshold) {
 }
 
 bool FrameProcessor::is_frame_unique(const cv::Mat& current, const cv::Mat& previous) {

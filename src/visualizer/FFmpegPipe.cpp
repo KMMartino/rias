@@ -1,7 +1,8 @@
 #include "FFmpegPipe.h"
+#include <print>
 
 
-FFmpegPipe::FFmpegPipe(int width, int height, int fps, const visualizerConfig& config){
+FFmpegPipe::FFmpegPipe(int width, int height, int fps, const VisualizerConfig& config){
     std::string codecOpts;
 
     switch (config.encoder) {

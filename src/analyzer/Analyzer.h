@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <map>
 #include "FrameProcessor.h"
-#include "ArgumentParser.h"
+#include "argParser.h"
 
 struct AnalysisResult{
     double timestampSec;
@@ -16,7 +17,7 @@ struct AnalysisResult{
 
 class Analyzer{
 public:
-    explicit Analyzer(const riasConfig& config);
+    explicit Analyzer(const AnalyzerConfig& config);
     
     bool analyze();
     void exportCsv(const std::string& outputPath) const;
@@ -24,7 +25,7 @@ public:
 
 private:
     FrameProcessor m_processor;
-    riasConfig m_config; 
+    AnalyzerConfig m_config; 
     size_t m_bufferIdx;
     double m_recordedFps;
     unsigned int m_uniqueFrames;
@@ -38,7 +39,7 @@ private:
     
     double calculateFrametime(size_t currentBufferIdx);
     void init(const cv::VideoCapture& capture);
-    void printReport(long long& loopDuration);
+    void printReport(const long long& loopDuration);
     void printTuningReport();
     double getLowFps(const std::map<unsigned int, int>& histogram, double percentile);
     void process(const int& frameCounter, const bool& unique);

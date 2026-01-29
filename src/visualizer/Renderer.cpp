@@ -1,6 +1,7 @@
 #include "Renderer.h"
+#include <print>
 
-Renderer::Renderer(const visualizerConfig& config)
+Renderer::Renderer(const VisualizerConfig& config)
     :m_config(config), m_cap(cv::VideoCapture(config.videoPath, cv::CAP_FFMPEG))
 {
     if (!m_cap.isOpened()) {

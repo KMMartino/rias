@@ -6,9 +6,9 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 #include <algorithm>
-#include <utility>
+#include <format>
 
-Analyzer::Analyzer(const riasConfig& config)
+Analyzer::Analyzer(const AnalyzerConfig& config)
     : m_processor(config.threshold)
     , m_config(config)
     , m_bufferIdx(0)
@@ -177,7 +177,7 @@ void Analyzer::init(const cv::VideoCapture& capture){
     m_results.reserve(m_totalFrames);
 }
 
-void Analyzer::printReport(long long& loopDuration){
+void Analyzer::printReport(const long long& loopDuration){
     double processingSpeed = 0.0;
     if(loopDuration > 0){
         processingSpeed = m_totalFrames * 1000 / loopDuration;
@@ -203,7 +203,7 @@ void Analyzer::printReport(long long& loopDuration){
         std::println("----------\ndetailed report\n");
         std::println("1% low fps: {}fps", getLowFps(frametimeHistogram, 0.01));
         std::println("0.1% low fps: {}fps", getLowFps(frametimeHistogram, 0.001));
-        std::println("stutters: -{}- major stutters were detedted (3 or more consecutive frames)", stutterCount);
+        std::println("stutters: -{}- major stutters were detected (3 or more consecutive frames)", stutterCount);
         std::println("\nreport end\n----------");
     }
     

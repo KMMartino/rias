@@ -1,5 +1,6 @@
 #include "Graphing.h"
 #include <algorithm>
+#include <format>
 
 Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameData>&& fullData)
     :m_ft2(cv::freetype::createFreeType2()), m_frameIdx(0), m_fullData(std::move(fullData)), m_videoFPS(vidFPS)
@@ -90,7 +91,7 @@ int Graphing::draw(cv::Mat& canvas) {
     }
 
     if (m_fpsPlot) {
-        FrameData future = getDataAt(m_frameIdx + m_videoFPS * 2.5);
+        FrameData future = getDataAt(m_frameIdx + int(m_videoFPS * 2.5));
         m_fpsPlot->addValue(future.fpsCurrent);
     }
 
