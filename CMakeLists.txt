@@ -39,6 +39,8 @@ add_library(rias-visualizer-lib STATIC
     src/visualizer/FFmpegPipe.cpp
     src/visualizer/VisualizerEntry.h
     src/visualizer/VisualizerEntry.cpp
+    src/visualizer/VideoSync.h
+    src/visualizer/VideoSync.cpp
 )
 target_include_directories(rias-visualizer-lib PUBLIC src src/visualizer)
 target_link_libraries(rias-visualizer-lib PRIVATE ${OpenCV_LIBS})

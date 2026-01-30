@@ -96,6 +96,13 @@ The program expects a mode as the first positional:
 - Options are cpu, nvenc, amf, and vce. The last 2 are the same thing.
 - This allows GPU encoding for the output video.
 
+## Flags (rias; mode av)
+### --offset (int 0-n, default: auto detect, *flag parameter required*)
+- Usage --offset int
+- It is likely that the lossless video will have the first few frames of the full res video missing due to OBS source record not being perfect. The program will auto detect this difference and apply that but you can also set it manually. 
+- --offset -1 was going to be reserved so you can run in av mode to get the offset then pass that into v mode as the offset if you happened to have the csv.
+- This idea was ditched because a mode runs so much faster than v mode that if you're going through the process of running av with offset -1 then going back to v mode with offset, just run av mode normally. That should be a lot quicker.
+
 ## Framerate calculation quirks
 - Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored
 - There has been a framerate extrapolator implemented for the first 1 sec which will give you a rough estimate of framerate during those times, but this is only a rough estimate especially for the earlier frames.
@@ -117,3 +124,4 @@ The program expects a mode as the first positional:
 - Add a flag --mono to switch between intended mode and single input mode.
 - Add support for 30 and 120fps video (currently assumes 60fps recording)
 - Add other encoding options.
+- Add flag to not delete csv in av mode.

@@ -24,6 +24,8 @@ struct VisualizerConfig {
     std::string videoPath = "";
     std::string csvPath = "";
     std::string outPath = "";
+    std::string analysisPath = "";
+    int offset = -1;
     EncoderType encoder = EncoderType::CPU;
 };
 

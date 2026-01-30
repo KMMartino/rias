@@ -65,6 +65,13 @@ argParser::argParser(int argc, char* argv[], std::string mode)
             } else{
                 throw std::runtime_error("Option Error: --encoder option needs a value (encoder type)");
             }
+        }if(arg == "--offset"){
+            if(i + 1 < argc){
+                v_config.offset = std::stoi(argv[i + 1]);
+                i++; continue;
+            } else{
+                throw std::runtime_error("Option Error: --encoder option needs a value (encoder type)");
+            }
         }
         posArgs.push_back(argv[i]);
     }
@@ -76,14 +83,14 @@ argParser::argParser(int argc, char* argv[], std::string mode)
 void argParser::posParse(const std::vector<std::string>& posArgs){
     if(m_mode == "a"){
         if(posArgs.size() != 1){
-            throw std::runtime_error("Error: too many positional arguments for analyzer mode (needs 1)");
+            throw std::runtime_error("Error: a mode requires 1 positional argument");
         }
         a_config.inPath = posArgs[0];
         a_config.outPath = m_output;
     }
     else if(m_mode == "v"){
         if(posArgs.size() != 2){
-            throw std::runtime_error("Error: too many positional arguments for visualizer mode (needs 2)");
+            throw std::runtime_error("Error: v mode requires 2 positional arguments");
         }
         v_config.videoPath = posArgs[0];
         v_config.csvPath = posArgs[1];
@@ -91,9 +98,10 @@ void argParser::posParse(const std::vector<std::string>& posArgs){
     }
     else if(m_mode == "av"){
         if(posArgs.size() != 2){
-            throw std::runtime_error("Error: too many positional arguments for av mode (needs 2)");
+            throw std::runtime_error("Error: av mode requires 2 positional arguments");
         }
         a_config.inPath = posArgs[0];
+        v_config.analysisPath = posArgs[0];
 
         std::filesystem::path inPath(a_config.inPath);
         a_config.outPath = inPath.replace_extension("").string() + "-result.csv";

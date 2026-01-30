@@ -1,5 +1,7 @@
 #include "Renderer.h"
+#include "VideoSync.h"
 #include <print>
+#include <stdexcept>
 
 Renderer::Renderer(const VisualizerConfig& config)
     :m_config(config), m_cap(cv::VideoCapture(config.videoPath, cv::CAP_FFMPEG))
@@ -16,10 +18,27 @@ Renderer::Renderer(const VisualizerConfig& config)
 }
 
 void Renderer::run(){
+    int skipFrames;
+    if(m_config.analysisPath != ""){
+        if(m_config.offset != -1){
+            skipFrames = m_config.offset;
+        }else{
+            skipFrames = VideoSync::getOffset(m_config.analysisPath, m_config.videoPath);
+        }
+    }
+    if (skipFrames >= 0) {
+        std::println("Fast-forwarding {} frames to align video...", skipFrames);
+        for (int i = 0; i < skipFrames; ++i) {
+            m_cap.grab(); 
+        }
+    }else{
+        throw std::runtime_error("Error: videos were not able to be sligned.");
+    }
+
     Graphing grapher = Graphing(m_width, m_height, m_fps, CsvLoader::load(m_config.csvPath));
     FFmpegPipe encoder = FFmpegPipe(m_width, m_height, m_fps, m_config);
     cv::Mat frame;
-    std::println("Rendering {} frames...", m_totalFrames);
+    std::println("Rendering {} frames...", m_totalFrames - skipFrames);
     while (true) {
         m_cap >> frame;
         if (frame.empty()) break;
