@@ -65,7 +65,8 @@ argParser::argParser(int argc, char* argv[], std::string mode)
             } else{
                 throw std::runtime_error("Option Error: --encoder option needs a value (encoder type)");
             }
-        }if(arg == "--offset"){
+        }
+        if(arg == "--offset"){
             if(i + 1 < argc){
                 v_config.offset = std::stoi(argv[i + 1]);
                 i++; continue;
@@ -73,7 +74,14 @@ argParser::argParser(int argc, char* argv[], std::string mode)
                 throw std::runtime_error("Option Error: --encoder option needs a value (encoder type)");
             }
         }
+        if(arg == "--mono"){
+            v_config.mono = true;
+            continue;
+        }
         posArgs.push_back(argv[i]);
+    }
+    if(v_config.mono && m_mode == "av"){
+        posArgs.push_back(posArgs[0]);
     }
     posParse(posArgs);
     validate();
@@ -164,6 +172,10 @@ void argParser::validate(){
     }
     if(a_config.tuningSet && m_mode != "a"){
         throw std::runtime_error("Mode error: tuning can only be done in analyzer mode");
+    }
+    if(v_config.mono && m_mode == "av"){
+        v_config.offset = 1;
+        std::println("Option Warning: --mono flag detected. Proceeding with offset 1");
     }
 }
 

@@ -26,6 +26,7 @@ struct VisualizerConfig {
     std::string outPath = "";
     std::string analysisPath = "";
     int offset = -1;
+    bool mono = 0;
     EncoderType encoder = EncoderType::CPU;
 };
 

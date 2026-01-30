@@ -83,9 +83,6 @@ The program expects a mode as the first positional:
 - Runs the program in a mode where it only counts the first 1 sec worth of frames, and compares the number to the provided flag parameter. It will recommend a different --threshold to use based on the results.
 - Best used with the --threshold option to test different threshold values and make sure the framerate counting is accurate.
 - **Important** If you use lossless video as the input the default threshold should be perfectly fine. While the tuning option is here, numbers produced by this program for a lossy input file, even if tuned, should not be considered reliable.
-### --mono (*no flag parameter*) currently not implemented
-- Usage --mono
-- V2 of rias assumes that you have a high res lossy file and a low res lossless file. This will be the default moving forward, but --mono is here in case you have a high res lossless file.
 
 ## Flags (rias-visualizer; mode v and av)
 ### --output (string xyz.csv, default: <input_file_name>-result.csv, *flag parameter required*)
@@ -102,6 +99,10 @@ The program expects a mode as the first positional:
 - It is likely that the lossless video will have the first few frames of the full res video missing due to OBS source record not being perfect. The program will auto detect this difference and apply that but you can also set it manually. 
 - --offset -1 was going to be reserved so you can run in av mode to get the offset then pass that into v mode as the offset if you happened to have the csv.
 - This idea was ditched because a mode runs so much faster than v mode that if you're going through the process of running av with offset -1 then going back to v mode with offset, just run av mode normally. That should be a lot quicker.
+### --mono (*no flag parameter*)
+- Usage --mono
+- In case you have a high res lossless file.
+- This will allow you to pass a single video file to av mode and have it still work. It will also adjust flags and such in the background to make everything work.
 
 ## Framerate calculation quirks
 - Due to the rolling framerate calculation logic and the program not having a full 1 sec worth of frames to work with at the beginning, the framerate numbers for the first 1 sec should be ignored
@@ -120,7 +121,6 @@ The program expects a mode as the first positional:
 - This is a personal tool; I don't know how github works really; Stuff may break.
 
 ## Todo
-- Add tool to automatically sync analysis video and full quality video.
 - Add a flag --mono to switch between intended mode and single input mode.
 - Add support for 30 and 120fps video (currently assumes 60fps recording)
 - Add other encoding options.
