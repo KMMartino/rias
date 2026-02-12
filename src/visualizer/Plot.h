@@ -13,7 +13,7 @@ struct PlotStyle {
     double maxVal;
     
     cv::Scalar lineColor;
-    cv::Scalar fillColor;
+    int lineWidth;
     std::string title;
     
     std::vector<double> gridLines;
@@ -35,5 +35,4 @@ private:
     cv::Mat m_bgLayer;
     cv::Mat m_polyLayer;
     std::vector<cv::Point> m_pointsGlobal;
-    std::vector<cv::Point> m_pointsLocal;
 };

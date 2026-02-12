@@ -19,4 +19,6 @@ private:
     std::unique_ptr<Plot> m_fpsPlot;
     std::unique_ptr<Plot> m_frametimePlot;
     int m_videoFPS = 60;
+    int m_fpsWindowSecs = 5;
+    int m_ftWindowSecs = 2;
 };

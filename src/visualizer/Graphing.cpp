@@ -11,8 +11,9 @@ Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameDat
         try { m_ft2->loadFontData("C:/Windows/Fonts/arial.ttf", 0); } catch(...) {}
     }
 
+
     int margin = (int)(vidWidth * 0.02);
-    int contentWidth = vidWidth - (2 * margin);
+    int contentWidth = vidWidth - (2.5 * margin);
 
     PlotStyle fpsStyle;
     int fpsHeight = (int)(vidHeight * 0.18);
@@ -25,26 +26,26 @@ Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameDat
     fpsStyle.title = "FRAME-RATE (FPS)";
     fpsStyle.alignTitleRight = true;
     fpsStyle.lineColor = cv::Scalar(100, 255, 100);
-    fpsStyle.fillColor = cv::Scalar(0, 200, 0);
-    fpsStyle.historySize = vidFPS * 5;
+    fpsStyle.lineWidth = 3;
+    fpsStyle.historySize = vidFPS * m_fpsWindowSecs;
 
     m_fpsPlot = std::make_unique<Plot>(fpsStyle);
 
     PlotStyle ftStyle;
     int ftHeight = (int)(vidHeight * 0.15);
-    int ftWidth  = (int)(vidWidth * 0.20);
+    int ftWidth  = (int)(vidWidth * 0.25);
     
     ftStyle.rect = cv::Rect(margin, fpsStyle.rect.y - margin - ftHeight, ftWidth, ftHeight);
     
     double frametimeBase = 1000.0 / vidFPS;
     ftStyle.minVal = 0.0;
-    ftStyle.maxVal = frametimeBase * 3;
-    ftStyle.gridLines = { frametimeBase, frametimeBase * 2 };
+    ftStyle.maxVal = frametimeBase * 4;
+    ftStyle.gridLines = { frametimeBase, frametimeBase * 2, frametimeBase * 3, frametimeBase * 4 };
     ftStyle.title = "FRAME-TIME (MS)";
     ftStyle.alignTitleRight = false;
     ftStyle.lineColor = cv::Scalar(100, 100, 255);
-    ftStyle.fillColor = cv::Scalar(0, 0, 200);
-    ftStyle.historySize = vidFPS * 2;
+    ftStyle.lineWidth = 2;
+    ftStyle.historySize = vidFPS * m_ftWindowSecs;
 
     m_frametimePlot = std::make_unique<Plot>(ftStyle);
 
@@ -54,13 +55,13 @@ Graphing::Graphing(int vidWidth, int vidHeight, int vidFPS, std::vector<FrameDat
         return m_fullData[idx];
     };
 
-    int fpsOffset = (int)(vidFPS * 2.5);
+    int fpsOffset = (int)(vidFPS * m_fpsWindowSecs / 2);
     for (int i = 0; i < fpsStyle.historySize - 1; i++) {
         int frameToLoad = i - (fpsStyle.historySize - 1) + fpsOffset;
         m_fpsPlot->addValue(getClampedData(frameToLoad).fpsCurrent);
     }
 
-    int ftOffset = m_videoFPS;
+    int ftOffset = (int)(m_videoFPS * m_ftWindowSecs / 2);
     for (int i = 0; i < ftStyle.historySize - 1; i++) {
         int frameToLoad = i - (ftStyle.historySize - 1) + ftOffset;
         m_frametimePlot->addValue(getClampedData(frameToLoad).frametime);
@@ -86,12 +87,12 @@ int Graphing::draw(cv::Mat& canvas) {
     };
 
     if (m_frametimePlot) {
-        FrameData future = getDataAt(m_frameIdx + m_videoFPS);
+        FrameData future = getDataAt(m_frameIdx + int(m_videoFPS * m_ftWindowSecs / 2));
         m_frametimePlot->addValue(future.frametime);
     }
 
     if (m_fpsPlot) {
-        FrameData future = getDataAt(m_frameIdx + int(m_videoFPS * 2.5));
+        FrameData future = getDataAt(m_frameIdx + int(m_videoFPS * m_fpsWindowSecs / 2));
         m_fpsPlot->addValue(future.fpsCurrent);
     }
 

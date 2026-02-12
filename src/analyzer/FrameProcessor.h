@@ -10,5 +10,5 @@ public:
 private:
     int m_pixelDiffThreshold;
 
-    cv::Mat m_diff;
+    cv::Mat m_diff, m_sumDiff;
 };

@@ -9,21 +9,13 @@ bool FrameProcessor::is_frame_unique(const cv::Mat& current, const cv::Mat& prev
         return false;
     }
 
-    static cv::Mat smallCur, smallPrev;
-    static cv::Mat smallCurGreen, smallPrevGreen;
+    cv::absdiff(current, previous, m_diff);
+    cv::Matx13f t(1.0f, 1.0f, 1.0f);
+    cv::transform(m_diff, m_sumDiff, t);
 
-    cv::resize(current, smallCur, cv::Size(480, 270), 0, 0, cv::INTER_NEAREST);
-    cv::resize(previous, smallPrev, cv::Size(480, 270), 0, 0, cv::INTER_NEAREST);
+    int count = cv::countNonZero(m_sumDiff > m_pixelDiffThreshold);
 
-    cv::extractChannel(smallCur, smallCurGreen, 1);
-    cv::extractChannel(smallPrev, smallPrevGreen, 1);
-
-    
-    cv::absdiff(smallCurGreen, smallPrevGreen, m_diff);
-    cv::threshold(m_diff, m_diff, (double)m_pixelDiffThreshold, 255, cv::THRESH_BINARY);
-    int non_zero = cv::countNonZero(m_diff);
-
-    return (non_zero > 0);
+    return (count > 5);
 }
 
 const cv::Mat& FrameProcessor::getDiff(){

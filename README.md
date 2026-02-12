@@ -121,7 +121,5 @@ The program expects a mode as the first positional:
 - This is a personal tool; I don't know how github works really; Stuff may break.
 
 ## Todo
-- Add a flag --mono to switch between intended mode and single input mode.
-- Add support for 30 and 120fps video (currently assumes 60fps recording)
 - Add other encoding options.
 - Add flag to not delete csv in av mode.

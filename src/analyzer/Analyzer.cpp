@@ -249,24 +249,19 @@ double Analyzer::getLowFps(const std::map<unsigned int, int>& histogram, double 
 }
 
 void Analyzer::process(const int& frameCounter, const bool& unique){
-    //current fps
     double currentFps = std::accumulate(m_fpsBuffer.begin(), m_fpsBuffer.end(), 0.0);
     if(frameCounter < m_bufferSize){
         currentFps *= (double)m_bufferSize / (frameCounter + 1);
     }
-    //current frame frametime
     double currentFrametime = 0.0;
     if(unique){
         currentFrametime = calculateFrametime(m_bufferIdx);
     }
-    //timestamp
     double currentDuration = (frameCounter + 1) / m_recordedFps;
-    //average fps
     double totalAveFramerate = m_uniqueFrames / currentDuration;
 
     m_results.push_back({currentDuration, totalAveFramerate, currentFps, currentFrametime, unique});
     
-    // increment rolling 1s buffer modulo framerate
     m_bufferIdx = (m_bufferIdx + 1) % m_bufferSize;
 
     if(frameCounter % (5 * m_bufferSize) == 0){

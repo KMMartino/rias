@@ -39,7 +39,7 @@ int VideoSync::getOffset(const std::string& lowResPath, const std::string& highR
 
         if (diff < minDiff) {
             minDiff = diff;
-            bestOffset = i - 4;
+            bestOffset = i - 2;
         }
     }
     std::println("Sync locked. High-Res is ahead by {} frames.", bestOffset);

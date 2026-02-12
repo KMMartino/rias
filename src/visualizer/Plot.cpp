@@ -4,7 +4,6 @@
 Plot::Plot(const PlotStyle& style)
     : m_style(style) {
     m_pointsGlobal.reserve(style.historySize + 5);
-    m_pointsLocal.reserve(style.historySize + 5);
 }
 
 void Plot::addValue(double val) {
@@ -28,6 +27,15 @@ void Plot::draw(cv::Mat& canvas, cv::Ptr<cv::freetype::FreeType2>& ft2) {
     cv::line(roi, cv::Point(centerX, 0), cv::Point(centerX, safeRect.height), 
                 cv::Scalar(255, 255, 255), 3, cv::LINE_AA);
 
+    int triSize = 20;
+    std::vector<cv::Point> triangle;
+    triangle.push_back(cv::Point(centerX - triSize, 0));
+    triangle.push_back(cv::Point(centerX + triSize, 0));
+    triangle.push_back(cv::Point(centerX, triSize + 2));
+    
+    cv::fillConvexPoly(roi, triangle, cv::Scalar(255, 255, 255), cv::LINE_AA);
+    cv::polylines(roi, triangle, true, cv::Scalar(0, 0, 0), 1, cv::LINE_AA);
+
     auto getY = [&](double val) {
         double clamped = std::max(m_style.minVal, std::min(val, m_style.maxVal));
         double ratio = (clamped - m_style.minVal) / (m_style.maxVal - m_style.minVal);
@@ -42,24 +50,23 @@ void Plot::draw(cv::Mat& canvas, cv::Ptr<cv::freetype::FreeType2>& ft2) {
 
     if (!m_history.empty()) {
         m_pointsGlobal.clear();
-        m_pointsLocal.clear();
-        m_pointsLocal.push_back(cv::Point(0, safeRect.height));
         
-        for (size_t i = 0; i < m_history.size(); ++i) {
-            int x = (int)((double)i / (m_style.historySize - 1) * safeRect.width);
-            int y = getY(m_history[i]);
-            m_pointsLocal.push_back(cv::Point(x, y));
-            m_pointsGlobal.push_back(cv::Point(safeRect.x + x, safeRect.y + y));
-        }
-        m_pointsLocal.push_back(cv::Point(safeRect.width, safeRect.height));
+        for (int i = 0; i < m_history.size(); ++i) {
+            int x1 = (int)((double)i / (m_style.historySize - 1) * safeRect.width);
+            
+            int x2 = (i < m_history.size() - 1) 
+                     ? (int)((double)(i + 1) / (m_style.historySize - 1) * safeRect.width)
+                     : safeRect.width;
 
-        m_polyLayer.create(roi.size(), roi.type());
-        m_polyLayer.setTo(cv::Scalar(0,0,0));
-        const cv::Point* ppt[1] = { m_pointsLocal.data() };
-        int npt[] = { (int)m_pointsLocal.size() };
-        cv::fillPoly(m_polyLayer, ppt, npt, 1, m_style.fillColor, cv::LINE_AA);
-        cv::addWeighted(m_polyLayer, 0.5, roi, 1.0, 0, roi);
-        cv::polylines(canvas, m_pointsGlobal, false, m_style.lineColor, 2, cv::LINE_AA);
+            int y = getY(m_history[i]);
+
+            m_pointsGlobal.push_back(cv::Point(safeRect.x + x1, safeRect.y + y));
+            if (x2 > x1) {
+                m_pointsGlobal.push_back(cv::Point(safeRect.x + x2, safeRect.y + y));
+            }
+        }
+
+        cv::polylines(canvas, m_pointsGlobal, false, m_style.lineColor, m_style.lineWidth, cv::LINE_AA);
     }
 
     cv::rectangle(canvas, safeRect, cv::Scalar(255, 255, 255), 3, cv::LINE_AA);
@@ -83,7 +90,7 @@ void Plot::draw(cv::Mat& canvas, cv::Ptr<cv::freetype::FreeType2>& ft2) {
         cv::Size textSize = ft2->getTextSize(m_style.title, titleSize, -1, &baseline);
         
         cv::Point titlePos;
-        int titleY = safeRect.y - 8;
+        int titleY = safeRect.y - 16;
 
         if (m_style.alignTitleRight) {
             titlePos = cv::Point(safeRect.x + safeRect.width - textSize.width, titleY);
