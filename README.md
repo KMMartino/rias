@@ -111,7 +111,7 @@ The program expects a mode as the first positional:
 
 ## How it works
 ### Analyzer
-- rias takes 2 frames, compares their green channel and counts up the number of pixels that are more different than the threshold. If it counts any, it will count the frames as different and record a short frametime / high framerate. 
+- rias takes 2 frames, compares their pixel values and counts up the number of pixels that are more different than the threshold. If it counts over a few, it will count the frames as different and record a short frametime / high framerate. 
 - If it detects that the frames are similar enough, it will record a long frametime / low framerate.
 ### Visualizer
 - rias will take the csv data to create a framerate and frametime plot, then draw those onto the video using opencv.
