@@ -8,18 +8,18 @@ FFmpegPipe::FFmpegPipe(int width, int height, int fps, const VisualizerConfig& c
     switch (config.encoder) {
         case EncoderType::NVENC:
             std::println("Encoder: NVIDIA NVENC (h264_nvenc)");
-            codecOpts = "-c:v h264_nvenc -preset p4 -rc constqp -qp 20";
+            codecOpts = "-c:v h264_nvenc -preset p4 -rc constqp -qp 21 -g 60 -bf 0";
             break;
 
         case EncoderType::AMF:
             std::println("Encoder: AMD AMF (h264_amf)");
-            codecOpts = "-c:v h264_amf -usage transcoding -rc cqp -qp_i 20 -qp_p 20 -qp_b 20";
+            codecOpts = "-c:v h264_amf -usage transcoding -rc cqp -qp_i 20 -qp_p 22 -qp_b 24 -g 60";
             break;
 
         case EncoderType::CPU:
         default:
             std::println("Encoder: CPU (libx264)");
-            codecOpts = "-c:v libx264 -preset fast -crf 18";
+            codecOpts = "-c:v libx264 -preset fast -crf 19 -g 60 -bf 0 -keyint_min 60";
             break;
     }
     
